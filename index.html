@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veil</title>
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+      <video id="bg-video" autoplay loop muted playsinline></video>
+  <div id="bg-image"></div>
+  <div id="bg-overlay"></div>
+ 
+  <!-- Clock -->
+  <div id="clock-wrap" class="hidden">
+    <div id="clock-time">00:00</div>
+    <div id="clock-date">Day, Month 00</div>
+  </div>
+ 
+  <!-- Empty state (no wallpaper set yet) -->
+  <div id="empty-state" class="hidden">
+    <div class="empty-card">
+      <h1>No wallpaper yet</h1>
+      <p>Upload an image or a video (up to 100MB) to personalize your new tab.</p>
+      <label class="btn primary" for="file-input">Choose file</label>
+    </div>
+  </div>
+ 
+  <!-- Settings gear + panel -->
+  <button id="settings-toggle" title="Settings" aria-label="Settings">⚙</button>
+ 
+  <div id="settings-panel" class="hidden">
+    <h2>New Tab Settings</h2>
+ 
+    <div class="setting-row">
+      <label class="btn primary" for="file-input">Upload image / video</label>
+      <input type="file" id="file-input" accept="image/*,video/*" hidden />
+    </div>
+ 
+    <div id="upload-status" class="status hidden"></div>
+ 
+    <div class="setting-row toggle-row">
+      <span>Show clock</span>
+      <label class="switch">
+        <input type="checkbox" id="clock-toggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+ 
+    <div class="setting-row">
+      <button id="remove-media" class="btn danger">Remove current wallpaper</button>
+    </div>
+ 
+    <p class="hint">Video limit: 100MB. Uploading a new file replaces the current wallpaper.</p>
+  </div>
+ 
+  <script src="js/db.js"></script>
+  <script src="js/content.js"></script>
+
+    
+</body>
+</html>
