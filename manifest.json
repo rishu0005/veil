@@ -6,7 +6,7 @@
   "description": "Allow users to upload their images and videos as a wallpaper in a new tab ",
    "chrome_url_overrides": { "newtab": "index.html" },
   "permissions": ["storage", "unlimitedStorage"],
-  "background": { "scripts": ["content.js"] },
+  
 
   "icons": {
     "48": "icons/border-48.png"
@@ -19,12 +19,5 @@
         "required": ["none"]
       }
     }
-  },
-
-  "content_scripts": [
-    {
-      "matches": ["*://*.mozilla.org/*"],
-      "js": ["veil.js"]
-    }
-  ]
+  }
 }

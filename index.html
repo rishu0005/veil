@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-      <video id="bg-video" autoplay loop muted playsinline></video>
-  <div id="bg-image"></div>
-  <div id="bg-overlay"></div>
+      <video id="bg-video" class="unselectable" autoplay  muted playsinline ></video>
+  <div class="unselectable" id="bg-image"></div>
+  <div class="unselectable" id="bg-overlay"></div>
  
   <!-- Clock -->
   <div id="clock-wrap" class="hidden">
@@ -28,7 +28,10 @@
   </div>
  
   <!-- Settings gear + panel -->
-  <button id="settings-toggle" title="Settings" aria-label="Settings">⚙  </button>
+   <div id="settings-hover-zone">
+
+     <button id="settings-toggle" title="Settings" aria-label="Settings">⚙  </button>
+   </div>
  
   <div id="settings-panel" class="hidden">
     <h2>New Tab Settings</h2>
@@ -47,12 +50,23 @@
         <span class="slider"></span>
       </label>
     </div>
+
+    <div class="setting-row toggle-row">
+      <span>Auto-hide settings icon</span>
+      <label class="switch">
+        <input type="checkbox" id="hover-reveal-toggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <p class="hint mb-3">When enabled, hover the top-right corner to bring the icon back </p>
  
     <div class="setting-row">
       <button id="remove-media" class="btn danger">Remove current wallpaper</button>
     </div>
  
-    <p class="hint">Video limit: 100MB. Uploading a new file replaces the current wallpaper.</p>
+    <p class="hint mb-3">Video limit: 300MB. Uploading a new file replaces the current wallpaper.</p>
+    <p class="hint  ">Use<code class="mark">Ctrl + shift + /</code>to open and close control panel.</p>
   </div>
  
   <script src="js/db.js"></script>
