@@ -15,6 +15,8 @@ const els = {
   clockToggle: document.getElementById("clock-toggle"),
   removeMediaBtn: document.getElementById("remove-media"),
   hoverRevealToggle: document.getElementById("hover-reveal-toggle"),
+  searchWrap : document.getElementById("search-wrap"),
+  searchInput : document.getElementById("search-input"),
 };
 
 let currentObjectUrl = null; // track so we can revoke it and avoid memory leaks
@@ -243,10 +245,30 @@ els.bgVideo.addEventListener('waiting', () => {
 });
 els.bgVideo.addEventListener('playing', () => clearTimeout(stallTimer));
 
+els.searchInput.addEventListener('keydown', (event) =>{
+    if(event.code === 'Enter'){
+
+      const query = els.searchInput.value.trim();
+
+      if(!query){
+        return;
+      }
+
+      const url = "https://www.google.com/search?q=" +
+            encodeURIComponent(query);
+
+      window.location.href = url;
+    }
+
+    if(event.code === 'Escape'){
+      els.searchInput.value = "";
+      els.searchInput.blur();
+    } 
+});
+
 window.addEventListener('keydown', (event) => {
   if(event.ctrlKey && event.shiftKey && event.code === 'Slash'){
     event.preventDefault();
-    console.log('crtl + shift + / got clicked');
 
     els.settingsPanel.classList.toggle('hidden');
     document.body.classList.toggle(
@@ -256,5 +278,27 @@ window.addEventListener('keydown', (event) => {
         
   }
 })
+
+window.addEventListener('keydown', (event) => {
+  if(event.ctrlKey && event.altKey && event.code === 'KeyT'){
+    event.preventDefault();
+    console.log('ctrl + Alt + T got clicked');
+    els.searchWrap.classList.toggle('hidden');
+    els.searchInput.focus();
+    els.searchInput.select();
+  }
+});
+
+window.addEventListener('keydown', (event) =>  {
+  if(event.ctrlKey && event.code === 'KeyK' ){
+    event.preventDefault();
+    if(els.searchWrap.classList.contains('hidden')){
+
+       els.searchWrap.classList.toggle('hidden');
+    }
+    els.searchInput.focus();
+    els.searchInput.select();
+  }
+});
 
 init();
