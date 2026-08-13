@@ -17,100 +17,12 @@ const els = {
   hoverRevealToggle: document.getElementById("hover-reveal-toggle"),
   searchWrap : document.getElementById("search-wrap"),
   searchInput : document.getElementById("search-input"),
+  DispalyTabs : document.getElementById("display-tabs"),
 };
 
 let currentObjectUrl = null; // track so we can revoke it and avoid memory leaks
 
-// ---------- Rendering ----------
 
-function clearBackground() {
-  els.bgVideo.pause();
-  els.bgVideo.removeAttribute("src");
-  els.bgVideo.load();
-  els.bgVideo.style.display = "none";
-
-  els.bgImage.style.backgroundImage = "";
-  els.bgImage.style.display = "none";
-
-  if (currentObjectUrl) {
-    URL.revokeObjectURL(currentObjectUrl);
-    currentObjectUrl = null;
-  }
-}
-
-function renderMedia(record) {
-  clearBackground();
-
-  if (!record) {
-    els.emptyState.classList.remove("hidden");
-    return;
-  }
-
-  els.emptyState.classList.add("hidden");
-  currentObjectUrl = URL.createObjectURL(record.file);
-
-  if (record.type.startsWith("video/")) {
-    els.bgVideo.preload = "auto";
-    els.bgVideo.src = currentObjectUrl;
-
-    const showAndPlay = () => {
-      els.bgVideo.style.display = "block";
-      els.bgVideo.play().catch(() => {});
-    };
-
-    if (isFullyBuffered(els.bgVideo)) {
-      showAndPlay();
-    } else {
-      els.bgVideo.addEventListener("canplaythrough", showAndPlay, { once: true });
-      els.bgVideo.load();
-    }
-  } else {
-    els.bgImage.style.backgroundImage = `url("${currentObjectUrl}")`;
-    els.bgImage.style.display = "block";
-  }
-}
-
-function isFullyBuffered(video) {
-  const buffered = video.buffered;
-  if (!buffered.length || !video.duration) return false;
-  return buffered.end(buffered.length - 1) >= video.duration - 0.1;
-}
-
-function renderClock() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  els.clockTime.textContent = `${hh}:${mm}`;
-  els.clockDate.textContent = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-let clockInterval = null;
-function setClockVisible(visible) {
-  els.clockWrap.classList.toggle("hidden", !visible);
-  if (visible) {
-    renderClock();
-    if (!clockInterval) clockInterval = setInterval(renderClock, 1000 * 15);
-  } else if (clockInterval) {
-    clearInterval(clockInterval);
-    clockInterval = null;
-  }
-}
-
-// ---------- Status messages ----------
-
-function showStatus(message, kind) {
-  els.uploadStatus.textContent = message;
-  els.uploadStatus.className = `status ${kind}`;
-  els.uploadStatus.classList.remove("hidden");
-}
-
-function hideStatus() {
-  els.uploadStatus.classList.add("hidden");
-}
 
 // ---------- Settings panel ----------
 
@@ -198,28 +110,7 @@ els.clockToggle.addEventListener("change", async (e) => {
 
 // ---------- Init ----------
 
-async function init() {
-  // Ask for persistent storage so the browser is less likely to evict
-  // our IndexedDB data (relevant once videos get large).
-  if (navigator.storage && navigator.storage.persist) {
-    navigator.storage.persist().catch(() => {});
-  }
 
-  const { showClock = true, hoverReveal = false } = await browser.storage.local.get(["showClock", "hoverReveal"]);
-els.clockToggle.checked = showClock;
-setClockVisible(showClock);
-
-els.hoverRevealToggle.checked = hoverReveal;
-document.body.classList.toggle("hover-reveal", hoverReveal);
-
-  try {
-    const record = await getMedia();
-    renderMedia(record);
-  } catch (err) {
-    console.error(err);
-    renderMedia(null);
-  }
-}
 els.bgVideo.loop = false;
 
 els.bgVideo.addEventListener('ended', () => {
@@ -230,7 +121,7 @@ els.bgVideo.addEventListener('ended', () => {
   });
 });
 
-// safety net for mid-playback stalls, separate from the loop-point issue
+
 let stallTimer = null;
 els.bgVideo.addEventListener('waiting', () => {
   clearTimeout(stallTimer);
@@ -246,13 +137,23 @@ els.bgVideo.addEventListener('waiting', () => {
 els.bgVideo.addEventListener('playing', () => clearTimeout(stallTimer));
 
 els.searchInput.addEventListener('keydown', (event) =>{
-    if(event.code === 'Enter'){
+    if(isExactShortcut(event, {
+      code: 'Enter'
+    })){
 
       const query = els.searchInput.value.trim();
+      const regex = /[\.\/\\]/g; 
+
 
       if(!query){
         return;
       }
+      const matches = query.match(regex);
+      if(matches){
+       const  url = "https://" + query;
+        window.location.href = url;
+      }
+
 
       const url = "https://www.google.com/search?q=" +
             encodeURIComponent(query);
@@ -260,14 +161,21 @@ els.searchInput.addEventListener('keydown', (event) =>{
       window.location.href = url;
     }
 
-    if(event.code === 'Escape'){
+    if(isExactShortcut(event, {
+      code: 'Escape'
+    })){
       els.searchInput.value = "";
       els.searchInput.blur();
     } 
 });
 
 window.addEventListener('keydown', (event) => {
-  if(event.ctrlKey && event.shiftKey && event.code === 'Slash'){
+  // ----------  Toggle Control Panel ----------
+  if(isExactShortcut(event, {
+    ctrl: true,
+    shift: true,
+    code: 'Slash'
+  })){
     event.preventDefault();
 
     els.settingsPanel.classList.toggle('hidden');
@@ -277,28 +185,23 @@ window.addEventListener('keydown', (event) => {
     );
         
   }
+
+  // ---------- Toggle Search Bar ----------
+  if (isExactShortcut(event, {
+        ctrl: true,
+        code: 'KeyK'
+  })){
+    event.preventDefault();
+  
+    console.log('Ctrl + K');
+    els.searchWrap.classList.toggle('hidden');
+  
+    els.searchInput.focus();
+    els.searchInput.select();
+  
+    getOpenTabs();
+  }
 })
 
-window.addEventListener('keydown', (event) => {
-  if(event.ctrlKey && event.altKey && event.code === 'KeyT'){
-    event.preventDefault();
-    console.log('ctrl + Alt + T got clicked');
-    els.searchWrap.classList.toggle('hidden');
-    els.searchInput.focus();
-    els.searchInput.select();
-  }
-});
-
-window.addEventListener('keydown', (event) =>  {
-  if(event.ctrlKey && event.code === 'KeyK' ){
-    event.preventDefault();
-    if(els.searchWrap.classList.contains('hidden')){
-
-       els.searchWrap.classList.toggle('hidden');
-    }
-    els.searchInput.focus();
-    els.searchInput.select();
-  }
-});
 
 init();

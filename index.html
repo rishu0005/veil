@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veil</title>
-    <link rel="shortcut icon" href="icon/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="icons/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
@@ -20,6 +20,7 @@
 
   <!-- Search -->
 <div id="search-wrap" class="hidden">
+
     <div id="search-box">
         <span id="search-icon">⌕</span>
 
@@ -28,11 +29,13 @@
             id="search-input"
             placeholder="Search the web..."
             autocomplete="off"
-            
         />
 
-        <span id="search-shortcut">Enter</span>
+        <span id="search-shortcut">↵</span>
     </div>
+
+    <div class="display-open-tabs" id="display-tabs">    </div>
+
 </div>
  
   <!-- Empty state (no wallpaper set yet) -->
@@ -87,7 +90,9 @@
   </div>
  
   <script src="js/db.js"></script>
-  <script src="js/content.js"></script>
+  <script src="js/helper.js"></script>
+  <script src="js/veil.js"></script>
+  <script src="background.js"></script>
 
     
 </body>

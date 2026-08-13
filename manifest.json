@@ -2,21 +2,30 @@
   "manifest_version": 3,
   "name": "Veil",
   "version": "1.0",
-
   "description": "Allow users to upload their images and videos as a wallpaper in a new tab ",
-   "chrome_url_overrides": { "newtab": "index.html" },
-  "permissions": ["storage", "unlimitedStorage"],
-  
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs"
+  ],
 
-  "icons": {
-    "48": "icons/border-48.png"
+  "background": {
+    "scripts": ["background.js"]
   },
 
+  "icons": {
+    "48": "icons/favicon.png"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "veil@mozilla.org",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   }
