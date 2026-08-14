@@ -299,8 +299,17 @@ body.hover-reveal.settings-panel-open #settings-toggle {
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.35);
   margin-top: -9px;
+  transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
-
+#search-box:focus-within + .display-open-tabs {
+    background: rgba(20, 20, 20, 0.5);
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.35);
+}
 
 /* Individual tab */
 .open-tab {
@@ -325,7 +334,7 @@ body.hover-reveal.settings-panel-open #settings-toggle {
 
 
 /* Selected tab */
-.open-tab.active {
+.open-tab.selected {
     background: rgba(255, 255, 255, 0.09);
 }
 
@@ -495,4 +504,7 @@ body.hover-reveal.settings-panel-open #settings-toggle {
 .unselectable{
   -ms-user-select: none;     /* IE 10 and Edge */
   user-select: none;   
+}
+.no-decoration{
+  text-decoration: none;
 }

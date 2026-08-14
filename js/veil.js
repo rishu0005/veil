@@ -17,7 +17,7 @@ const els = {
   hoverRevealToggle: document.getElementById("hover-reveal-toggle"),
   searchWrap : document.getElementById("search-wrap"),
   searchInput : document.getElementById("search-input"),
-  DispalyTabs : document.getElementById("display-tabs"),
+  DisplayTabs : document.getElementById("display-tabs"),
 };
 
 let currentObjectUrl = null; // track so we can revoke it and avoid memory leaks
@@ -108,7 +108,6 @@ els.clockToggle.addEventListener("change", async (e) => {
   await browser.storage.local.set({ showClock: enabled });
 });
 
-// ---------- Init ----------
 
 
 els.bgVideo.loop = false;
@@ -136,72 +135,125 @@ els.bgVideo.addEventListener('waiting', () => {
 });
 els.bgVideo.addEventListener('playing', () => clearTimeout(stallTimer));
 
-els.searchInput.addEventListener('keydown', (event) =>{
-    if(isExactShortcut(event, {
-      code: 'Enter'
-    })){
+els.searchInput.addEventListener('keydown', async (event) =>{
 
+
+  if(isExactShortcut(event, {
+    code: "ArrowDown"
+  })){
+      event.preventDefault();
+      moveTabSelection('down');
+      return;
+  }
+
+  if(isExactShortcut(event, {
+    code: "ArrowUp"
+  })){
+      event.preventDefault();
+      moveTabSelection('up');
+      return;
+  }
+
+
+  if(isExactShortcut(event, {
+    code: 'Enter'
+  })){
+      event.preventDefault();
+      const tabs = els.DisplayTabs.querySelectorAll('.open-tab');
       const query = els.searchInput.value.trim();
-      const regex = /[\.\/\\]/g; 
+      /*
+      * If a tab is selected,
+      * switch to that existing tab.
+      */
 
-
-      if(!query){
-        return;
+      if (
+          selectedTabIndex >= 0 &&
+          selectedTabIndex < tabs.length && !query
+      ) {
+          const selectedTab = tabs[selectedTabIndex];
+          const tabId = Number(
+              selectedTab.dataset.tabId
+          );
+          await jumpToTab(tabId);
+          return;
       }
-      const matches = query.match(regex);
-      if(matches){
-       const  url = "https://" + query;
-        window.location.href = url;
-      }
 
-
+    
+    if(!query){
+      return;
+    }
+    
+    if (isUrl(query)) {
+      const url = /^https?:\/\//i.test(query)
+      ? query
+      : "https://" + query;
+      
+      window.location.href = url;
+    } else {
       const url = "https://www.google.com/search?q=" +
-            encodeURIComponent(query);
-
+      encodeURIComponent(query);
+      
       window.location.href = url;
     }
+  }
+  
+  if(isExactShortcut(event, {
+    code: 'Escape'
+  })){
+    els.searchInput.value = "";
+      selectedTabIndex = -1;
+        updateSelectedTab();
 
-    if(isExactShortcut(event, {
-      code: 'Escape'
-    })){
-      els.searchInput.value = "";
-      els.searchInput.blur();
-    } 
+    els.searchInput.blur();
+  } 
 });
 
+els.DisplayTabs.addEventListener('click', async (event) => {
+
+    const tabElement = event.target.closest('.open-tab');
+    if (!tabElement) {
+        return;
+    }
+    const tabId = Number(
+        tabElement.dataset.tabId
+    );
+    await jumpToTab(tabId);
+
+});
+// ----------  Toggle Control Panel ----------
 window.addEventListener('keydown', (event) => {
-  // ----------  Toggle Control Panel ----------
   if(isExactShortcut(event, {
     ctrl: true,
     shift: true,
     code: 'Slash'
   })){
     event.preventDefault();
-
+    
     els.settingsPanel.classList.toggle('hidden');
     document.body.classList.toggle(
       'settings-panel-open',
       !els.settingsPanel.classList.contains('hidden')
     );
-        
+    
   }
-
+  
   // ---------- Toggle Search Bar ----------
   if (isExactShortcut(event, {
-        ctrl: true,
-        code: 'KeyK'
+    ctrl: true,
+    code: 'KeyK'
   })){
     event.preventDefault();
-  
+    
     console.log('Ctrl + K');
     els.searchWrap.classList.toggle('hidden');
-  
+    
     els.searchInput.focus();
     els.searchInput.select();
-  
+    
     getOpenTabs();
   }
 })
 
 
+// ---------- Init ----------
 init();

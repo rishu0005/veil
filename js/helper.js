@@ -1,5 +1,3 @@
-
-
 // ----------  Rendering Functions ----------
 
 function clearBackground() {
@@ -92,52 +90,132 @@ function hideStatus() {
 } 
 
 // ---------- Tab Functions ----------
-
+let selectedTabIndex = -1;
 async function getOpenTabs() {
     try {
         const tabs = await browser.tabs.query({});
 
         if (tabs.length === 0) {
+            els.DisplayTabs.innerHTML = '';
             console.log("No tabs found.");
             return
         } 
-      const activeTab = tabs.find(tab => tab.active);
-      const tabsToDisplay = [
-          activeTab,
-          ...tabs.filter(tab => tab.id !== activeTab?.id)
-      ].slice(0, 4);
+        const activeTab = tabs.find(tab => tab.active);
+        const tabsToDisplay = tabs
+            .filter(tab => tab.id !== activeTab?.id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 4);
 
-      let tabsToShow = '';
+        let tabsToShow = '';
 
-      tabsToDisplay.forEach(tab => {
-          const isActive = tab.active ? 'active' : 'inactive';
-          tabsToShow += `
-              <div class="open-tab ${isActive}">  
-                  <div class="tab-favicon">
-                      <img 
-                          src="${tab.favIconUrl || ''}" 
-                          alt="${tab.title || 'Tab'}"
-                      >
-                  </div>
+        tabsToDisplay.forEach(tab => {
+            const isActive = tab.active ? 'active' : 'inactive';
+            tabsToShow += `
+                <div
+                    class="open-tab"
+                    data-tab-id="${tab.id}"
+                >
 
-                  <div class="tab-info">
-                      <div class="tab-title">${tab.title || 'Untitled'}</div>
-                      <div class="tab-url">${tab.url || ''}</div>
-                  </div>
+                    <div class="tab-favicon">
 
-                  <div class="tab-action">
-                      ↵
-                  </div>
-              </div>
-          `;
-      });
+                        <img
+                            src="${tab.favIconUrl || ''}"
+                            alt="${tab.title || 'Tab'}"
+                        >
 
-      els.DispalyTabs.innerHTML = tabsToShow ;
+                    </div>
+
+
+                    <div class="tab-info">
+
+                        <div class="tab-title">
+                            ${tab.title || 'Untitled'}
+                        </div>
+
+                        <div class="tab-url">
+                            ${tab.url || ''} → Switch To Tab
+                        </div>
+
+                    </div>
+
+
+                    <div class="tab-action">
+                        ↵
+                    </div>
+
+                </div>
+            `;
+        });
+
+      els.DisplayTabs.innerHTML = tabsToShow ;
+              selectedTabIndex = -1;
+
 
       tabsToShow = '';
     } catch (error) {
         console.error("Error getting tabs:", error);
     }
+}
+
+async function jumpToTab(targetTabId) {
+  try {
+    let tab = await browser.tabs.get(targetTabId);
+    await browser.tabs.update(targetTabId, { active: true });
+
+    await browser.windows.update(tab.windowId, { focused: true });
+  } catch (error) {
+    console.error("Failed to jump to tab:", error);
+  }
+}
+
+
+function updateSelectedTab() {
+    const tabs = els.DisplayTabs.querySelectorAll('.open-tab');
+
+    tabs.forEach((tab, index) => {
+        tab.classList.toggle(
+            'selected',
+            index === selectedTabIndex
+        );
+    });
+}
+
+function moveTabSelection(direction) {
+
+    const tabs = els.DisplayTabs.querySelectorAll('.open-tab');
+
+    if (tabs.length === 0) {
+        return;
+    }
+
+
+    // Move down
+    if (direction === 'down') {
+
+        selectedTabIndex++;
+
+        // Loop back to first tab
+        if (selectedTabIndex >= tabs.length) {
+            selectedTabIndex = 0;
+        }
+
+    }
+
+
+    // Move up
+    if (direction === 'up') {
+
+        selectedTabIndex--;
+
+        // Loop to last tab
+        if (selectedTabIndex < 0) {
+            selectedTabIndex = tabs.length - 1;
+        }
+
+    }
+
+
+    updateSelectedTab();
 }
 
 // ---------- Keyboard Control Functions  ----------
@@ -180,4 +258,31 @@ document.body.classList.toggle("hover-reveal", hoverReveal);
     console.error(err);
     renderMedia(null);
   }
+}
+
+
+
+// ---------- Search Function ----------
+function isUrl(query) {
+    // Already has a protocol
+    if (/^https?:\/\//i.test(query)) {
+        return true;
+    }
+
+    // localhost
+    if (/^localhost(?::\d+)?(?:\/.*)?$/i.test(query)) {
+        return true;
+    }
+
+    // IP address
+    if (/^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(query)) {
+        return true;
+    }
+
+    // Domain name
+    if (/^[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/.*)?$/i.test(query)) {
+        return true;
+    }
+
+    return false;
 }
