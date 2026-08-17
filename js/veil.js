@@ -254,6 +254,102 @@ window.addEventListener('keydown', (event) => {
   }
 })
 
+els.searchInput.addEventListener('input', () => {
 
+    const query = els.searchInput.value.trim();
+
+    // Typing a new query means nothing is selected
+    selectedTabIndex = -1;
+
+    renderOpenTabs(query);
+});
+
+els.searchInput.addEventListener('keydown', async (event) => {
+
+    // -------------------------
+    // Arrow Down
+    // -------------------------
+
+    if (event.code === 'ArrowDown') {
+
+        event.preventDefault();
+
+        if (displayedTabs.length === 0) {
+            return;
+        }
+
+        selectedTabIndex++;
+
+        if (selectedTabIndex >= displayedTabs.length) {
+            selectedTabIndex = 0;
+        }
+
+        updateSelectedTab();
+
+        return;
+    }
+
+
+    // -------------------------
+    // Arrow Up
+    // -------------------------
+
+    if (event.code === 'ArrowUp') {
+
+        event.preventDefault();
+
+        if (displayedTabs.length === 0) {
+            return;
+        }
+
+        selectedTabIndex--;
+
+        if (selectedTabIndex < 0) {
+            selectedTabIndex = displayedTabs.length - 1;
+        }
+
+        updateSelectedTab();
+
+        return;
+    }
+
+
+    // -------------------------
+    // Enter
+    // -------------------------
+
+    if (event.code === 'Enter') {
+
+        event.preventDefault();
+
+
+        // User explicitly selected an open tab
+        if (selectedTabIndex !== -1) {
+
+            const selectedTab = displayedTabs[selectedTabIndex];
+
+            await jumpToTab(selectedTab.id);
+
+            return;
+        }
+
+
+        // No tab selected → normal Google search
+
+        const query = els.searchInput.value.trim();
+
+        if (!query) {
+            return;
+        }
+
+
+        const url =
+            "https://www.google.com/search?q=" +
+            encodeURIComponent(query);
+
+
+        window.location.href = url;
+    }
+});
 // ---------- Init ----------
 init();

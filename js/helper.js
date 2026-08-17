@@ -91,9 +91,15 @@ function hideStatus() {
 
 // ---------- Tab Functions ----------
 let selectedTabIndex = -1;
+let openTabs = [];
+
 async function getOpenTabs() {
     try {
         const tabs = await browser.tabs.query({});
+
+        
+
+      renderOpenTabs(els.searchInput.value.trim());
 
         if (tabs.length === 0) {
             els.DisplayTabs.innerHTML = '';
@@ -105,7 +111,9 @@ async function getOpenTabs() {
             .filter(tab => tab.id !== activeTab?.id)
             .sort(() => Math.random() - 0.5)
             .slice(0, 4);
-
+        openTabs = tabs
+                  .filter(tab => tab.id !== activeTab?.id)
+                  .slice(0, 4);
         let tabsToShow = '';
 
         tabsToDisplay.forEach(tab => {
@@ -115,19 +123,14 @@ async function getOpenTabs() {
                     class="open-tab"
                     data-tab-id="${tab.id}"
                 >
-
                     <div class="tab-favicon">
-
                         <img
                             src="${tab.favIconUrl || ''}"
                             alt="${tab.title || 'Tab'}"
                         >
-
                     </div>
 
-
                     <div class="tab-info">
-
                         <div class="tab-title">
                             ${tab.title || 'Untitled'}
                         </div>
@@ -135,14 +138,11 @@ async function getOpenTabs() {
                         <div class="tab-url">
                             ${tab.url || ''} → Switch To Tab
                         </div>
-
                     </div>
-
 
                     <div class="tab-action">
                         ↵
                     </div>
-
                 </div>
             `;
         });
@@ -216,6 +216,57 @@ function moveTabSelection(direction) {
 
 
     updateSelectedTab();
+}
+
+function renderOpenTabs(query = '') {
+  let displayedTabs = [];
+    const normalizedQuery = query.toLowerCase();
+
+    displayedTabs = openTabs.filter(tab => {
+
+        const title = (tab.title || '').toLowerCase();
+        const url = (tab.url || '').toLowerCase();
+
+        return (
+            title.includes(normalizedQuery) ||
+            url.includes(normalizedQuery)
+        );
+
+    });
+
+    let tabsToShow = '';
+
+    displayedTabs.forEach((tab, index) => {
+
+        tabsToShow += `
+            <div
+                class="open-tab ${index === selectedTabIndex ? 'selected' : ''}"
+                data-tab-id="${tab.id}"
+            >
+                <div class="tab-favicon">
+                    <img
+                        src="${tab.favIconUrl || ''}"
+                        alt="${tab.title || 'Tab'}"
+                    >
+                </div>
+
+                <div class="tab-info">
+                    <div class="tab-title">
+                        ${tab.title || 'Untitled'}
+                    </div>
+
+                    <div class="tab-url">
+                        ${tab.url || ''} → Switch To Tab
+                    </div>
+                </div>
+                <div class="tab-action">
+                    ↵
+                </div>
+            </div>
+        `;
+    });
+
+    els.DisplayTabs.innerHTML = tabsToShow;
 }
 
 // ---------- Keyboard Control Functions  ----------
