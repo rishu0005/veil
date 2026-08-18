@@ -22,19 +22,25 @@
 <div id="search-wrap" class="hidden">
 
     <div id="search-box">
-        <span id="search-icon">⌕</span>
-
+        <!-- <span id="search-icon">⌕</span> -->
+          <button id="search-engine" type="button">
+            <img id="search-engine-icon" class="favicon" src="" alt="">
+            <span id="search-engine-name" class="hidden"></span>
+            <span class="engine-arrow"> ⌄</span>
+        </button>
         <input
             type="text"
             id="search-input"
             placeholder="Search the web..."
             autocomplete="off"
         />
-
+        
+        
         <span id="search-shortcut">↵</span>
-    </div>
-
-    <div class="display-open-tabs" id="display-tabs"></div>
+      </div>
+      
+      <div class="display-open-tabs" id="display-tabs"></div>
+      <div id="search-engine-list" class="hidden"></div>
 
 </div>
  

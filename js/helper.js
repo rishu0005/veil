@@ -1,3 +1,5 @@
+let searchEngines = [];
+let selectedEngine = null;
 // ----------  Rendering Functions ----------
 
 function clearBackground() {
@@ -92,66 +94,33 @@ function hideStatus() {
 // ---------- Tab Functions ----------
 let selectedTabIndex = -1;
 let openTabs = [];
+let displayedTabs = [];
 
 async function getOpenTabs() {
     try {
         const tabs = await browser.tabs.query({});
 
-        
-
-      renderOpenTabs(els.searchInput.value.trim());
-
-        if (tabs.length === 0) {
+         if (tabs.length === 0) {
+            openTabs = [];
+            displayedTabs = [];
             els.DisplayTabs.innerHTML = '';
             console.log("No tabs found.");
-            return
-        } 
+            return;
+        }
+
         const activeTab = tabs.find(tab => tab.active);
-        const tabsToDisplay = tabs
-            .filter(tab => tab.id !== activeTab?.id)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 4);
+       
         openTabs = tabs
                   .filter(tab => tab.id !== activeTab?.id)
-                  .slice(0, 4);
-        let tabsToShow = '';
+                  .sort(() => Math.random() - 0.5);
+                  // .slice(0, 4);
 
-        tabsToDisplay.forEach(tab => {
-            const isActive = tab.active ? 'active' : 'inactive';
-            tabsToShow += `
-                <div
-                    class="open-tab"
-                    data-tab-id="${tab.id}"
-                >
-                    <div class="tab-favicon">
-                        <img
-                            src="${tab.favIconUrl || ''}"
-                            alt="${tab.title || 'Tab'}"
-                        >
-                    </div>
+          selectedTabIndex = -1;
 
-                    <div class="tab-info">
-                        <div class="tab-title">
-                            ${tab.title || 'Untitled'}
-                        </div>
+       renderOpenTabs(
+            els.searchInput.value.trim()
+        );
 
-                        <div class="tab-url">
-                            ${tab.url || ''} → Switch To Tab
-                        </div>
-                    </div>
-
-                    <div class="tab-action">
-                        ↵
-                    </div>
-                </div>
-            `;
-        });
-
-      els.DisplayTabs.innerHTML = tabsToShow ;
-              selectedTabIndex = -1;
-
-
-      tabsToShow = '';
     } catch (error) {
         console.error("Error getting tabs:", error);
     }
@@ -219,22 +188,39 @@ function moveTabSelection(direction) {
 }
 
 function renderOpenTabs(query = '') {
-  let displayedTabs = [];
-    const normalizedQuery = query.toLowerCase();
+  
+    const normalizedQuery = query.toLowerCase().trim();
+    let filteredTabs = openTabs;
 
-    displayedTabs = openTabs.filter(tab => {
+    if (normalizedQuery) {
 
-        const title = (tab.title || '').toLowerCase();
-        const url = (tab.url || '').toLowerCase();
+        filteredTabs = openTabs.filter(tab => {
 
-        return (
-            title.includes(normalizedQuery) ||
-            url.includes(normalizedQuery)
-        );
+            const title =
+                (tab.title || '').toLowerCase();
 
-    });
+            const url =
+                (tab.url || '').toLowerCase();
+
+
+            return (
+                title.includes(normalizedQuery) ||
+                url.includes(normalizedQuery)
+            );
+
+        });
+
+    }
+
+   
+
+    displayedTabs = filteredTabs.slice(0, 4);
 
     let tabsToShow = '';
+
+    if(displayedTabs.length === 0){
+      
+    }
 
     displayedTabs.forEach((tab, index) => {
 
@@ -315,8 +301,11 @@ document.body.classList.toggle("hover-reveal", hoverReveal);
 
 // ---------- Search Function ----------
 function isUrl(query) {
+
+    query = query.trim();
+
     // Already has a protocol
-    if (/^https?:\/\//i.test(query)) {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(query)) {
         return true;
     }
 
@@ -325,15 +314,177 @@ function isUrl(query) {
         return true;
     }
 
-    // IP address
-    if (/^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(query)) {
+    // IPv4 address
+    if (
+        /^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(query)
+    ) {
         return true;
     }
 
     // Domain name
-    if (/^[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/.*)?$/i.test(query)) {
+    if (
+        /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d+)?(?:\/.*)?$/i.test(query)
+    ) {
         return true;
     }
 
     return false;
+}
+
+function getSearchHistory() {
+    return JSON.parse(
+        localStorage.getItem('veil-search-history') || '[]'
+    );
+}
+
+function saveSearchQuery(query) {
+
+    query = query.trim();
+
+    if (!query) {
+        return;
+    }
+
+    let history = getSearchHistory();
+
+    // Remove duplicate
+    history = history.filter(
+        item => item.toLowerCase() !== query.toLowerCase()
+    );
+
+    // Put newest search at the beginning
+    history.unshift(query);
+
+    // Keep only latest 50
+    history = history.slice(0, MAX_SEARCH_HISTORY);
+
+    localStorage.setItem(
+        'veil-search-history',
+        JSON.stringify(history)
+    );
+}
+
+async function performSearch(query) {
+
+    if (!selectedEngine) {
+        console.error("No search engine selected");
+        return;
+    }
+
+    console.log("Searching with:", selectedEngine.name);
+
+    await browser.search.search({
+        query: query,
+        engine: selectedEngine.name,
+        disposition: "CURRENT_TAB"
+    });
+}
+
+
+// ---------- Search Engine Function ----------
+
+async function loadSearchEngines() {
+
+    try {
+
+        searchEngines = await browser.search.get();
+
+        if (!searchEngines.length) {
+            console.error("No search engines available.");
+            return;
+        }
+
+        const saved = await browser.storage.local.get("searchEngine");
+
+        if (saved.searchEngine) {
+
+            selectedEngine = searchEngines.find(
+                engine => engine.name === saved.searchEngine
+            );
+
+        }
+
+        // Saved engine no longer exists
+        if (!selectedEngine) {
+
+            selectedEngine =
+                searchEngines.find(
+                    engine => engine.isDefault
+                ) || searchEngines[0];
+
+        }
+
+        renderSelectedEngine();
+        renderSearchEngines();
+
+        console.log("Selected engine:", selectedEngine);
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load search engines:",
+            error
+        );
+
+    }
+}
+function renderSelectedEngine() {
+
+    if (!selectedEngine) {
+        return;
+    }
+
+    const icon = document.getElementById("search-engine-icon");
+    const name = document.getElementById("search-engine-name");
+
+    // name.textContent = selectedEngine.name;
+
+    if (selectedEngine.favIconUrl) {
+        icon.src = selectedEngine.favIconUrl;
+    }
+}
+function renderSearchEngines() {
+
+    els.engineList.innerHTML = "";
+
+    searchEngines.forEach(engine => {
+
+        const button = document.createElement("button");
+
+        button.className = "search-engine-option";
+
+        button.innerHTML = `
+            <img class="favicon"
+                src="${engine.favIconUrl || ""}"
+                alt=""
+            >
+
+            <span class="text-light">${engine.name}</span>
+            
+        `;
+
+        button.addEventListener("click", () => {
+            selectSearchEngine(engine);
+        });
+
+        els.engineList.appendChild(button);
+    });
+}
+async function selectSearchEngine(engine) {
+
+    selectedEngine = engine;
+
+    await browser.storage.local.set({
+        searchEngine: engine.name
+    });
+
+    renderSelectedEngine();
+
+    els.engineList.classList.add("hidden");
+}
+
+// ---------- Start Function ----------
+async function startVeil() {
+    await loadSearchEngines();
+    await init();
 }

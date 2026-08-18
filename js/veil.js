@@ -1,5 +1,6 @@
 const MAX_VIDEO_BYTES = 300 * 1024 * 1024; // 300MB
 const MAX_IMAGE_BYTES = 300 * 1024 * 1024; // 300MB
+const MAX_SEARCH_HISTORY = 50;
 
 const els = {
   bgVideo: document.getElementById("bg-video"),
@@ -18,6 +19,8 @@ const els = {
   searchWrap : document.getElementById("search-wrap"),
   searchInput : document.getElementById("search-input"),
   DisplayTabs : document.getElementById("display-tabs"),
+  engineButton : document.getElementById("search-engine"),
+  engineList : document.getElementById("search-engine-list"),
 };
 
 let currentObjectUrl = null; // track so we can revoke it and avoid memory leaks
@@ -141,60 +144,79 @@ els.searchInput.addEventListener('keydown', async (event) =>{
   if(isExactShortcut(event, {
     code: "ArrowDown"
   })){
-      event.preventDefault();
-      moveTabSelection('down');
-      return;
+
+     event.preventDefault();
+
+        if (displayedTabs.length === 0) {
+            return;
+        }
+
+        selectedTabIndex++;
+
+        if (selectedTabIndex >= displayedTabs.length) {
+            selectedTabIndex = 0;
+        }
+
+        updateSelectedTab();
+
+        return;
   }
 
   if(isExactShortcut(event, {
     code: "ArrowUp"
   })){
       event.preventDefault();
-      moveTabSelection('up');
-      return;
+
+        if (displayedTabs.length === 0) {
+            return;
+        }
+
+        selectedTabIndex--;
+
+        if (selectedTabIndex < 0) {
+            selectedTabIndex = displayedTabs.length - 1;
+        }
+
+        updateSelectedTab();
+
+        return;
   }
 
 
   if(isExactShortcut(event, {
     code: 'Enter'
   })){
-      event.preventDefault();
-      const tabs = els.DisplayTabs.querySelectorAll('.open-tab');
-      const query = els.searchInput.value.trim();
-      /*
-      * If a tab is selected,
-      * switch to that existing tab.
-      */
 
-      if (
-          selectedTabIndex >= 0 &&
-          selectedTabIndex < tabs.length && !query
-      ) {
-          const selectedTab = tabs[selectedTabIndex];
-          const tabId = Number(
-              selectedTab.dataset.tabId
-          );
-          await jumpToTab(tabId);
+    event.preventDefault();
+
+        if (selectedTabIndex !== -1) {
+
+            const selectedTab = displayedTabs[selectedTabIndex];
+
+            await jumpToTab(selectedTab.id);
+
+            return;
+        }
+        const query = els.searchInput.value.trim();
+
+        if (!query) {
+            return;
+        }
+
+        saveSearchQuery(query);
+
+      if (isUrl(query)) {
+          let url = query;
+
+          if (!/^https?:\/\//i.test(url)) {
+              url = "https://" + url;
+          }
+
+          window.location.href = url;
           return;
       }
 
-    
-    if(!query){
-      return;
-    }
-    
-    if (isUrl(query)) {
-      const url = /^https?:\/\//i.test(query)
-      ? query
-      : "https://" + query;
-      
-      window.location.href = url;
-    } else {
-      const url = "https://www.google.com/search?q=" +
-      encodeURIComponent(query);
-      
-      window.location.href = url;
-    }
+      await performSearch(query);
   }
   
   if(isExactShortcut(event, {
@@ -202,11 +224,22 @@ els.searchInput.addEventListener('keydown', async (event) =>{
   })){
     els.searchInput.value = "";
       selectedTabIndex = -1;
-        updateSelectedTab();
-
+        // updateSelectedTab();
+    renderOpenTabs("");
     els.searchInput.blur();
+    return;
   } 
 });
+
+els.searchInput.addEventListener('input', () => {
+
+    const query = els.searchInput.value.trim();
+
+    // Typing a new query means nothing is selected
+    selectedTabIndex = -1;
+
+    renderOpenTabs(query);
+}); 
 
 els.DisplayTabs.addEventListener('click', async (event) => {
 
@@ -254,102 +287,14 @@ window.addEventListener('keydown', (event) => {
   }
 })
 
-els.searchInput.addEventListener('input', () => {
 
-    const query = els.searchInput.value.trim();
+els.engineButton.addEventListener("click", (event) => {
 
-    // Typing a new query means nothing is selected
-    selectedTabIndex = -1;
+    event.stopPropagation();
 
-    renderOpenTabs(query);
+    els.engineList.classList.toggle("hidden");
+
 });
 
-els.searchInput.addEventListener('keydown', async (event) => {
-
-    // -------------------------
-    // Arrow Down
-    // -------------------------
-
-    if (event.code === 'ArrowDown') {
-
-        event.preventDefault();
-
-        if (displayedTabs.length === 0) {
-            return;
-        }
-
-        selectedTabIndex++;
-
-        if (selectedTabIndex >= displayedTabs.length) {
-            selectedTabIndex = 0;
-        }
-
-        updateSelectedTab();
-
-        return;
-    }
-
-
-    // -------------------------
-    // Arrow Up
-    // -------------------------
-
-    if (event.code === 'ArrowUp') {
-
-        event.preventDefault();
-
-        if (displayedTabs.length === 0) {
-            return;
-        }
-
-        selectedTabIndex--;
-
-        if (selectedTabIndex < 0) {
-            selectedTabIndex = displayedTabs.length - 1;
-        }
-
-        updateSelectedTab();
-
-        return;
-    }
-
-
-    // -------------------------
-    // Enter
-    // -------------------------
-
-    if (event.code === 'Enter') {
-
-        event.preventDefault();
-
-
-        // User explicitly selected an open tab
-        if (selectedTabIndex !== -1) {
-
-            const selectedTab = displayedTabs[selectedTabIndex];
-
-            await jumpToTab(selectedTab.id);
-
-            return;
-        }
-
-
-        // No tab selected → normal Google search
-
-        const query = els.searchInput.value.trim();
-
-        if (!query) {
-            return;
-        }
-
-
-        const url =
-            "https://www.google.com/search?q=" +
-            encodeURIComponent(query);
-
-
-        window.location.href = url;
-    }
-});
 // ---------- Init ----------
-init();
+startVeil();
