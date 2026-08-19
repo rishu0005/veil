@@ -537,6 +537,31 @@ body.hover-reveal.settings-panel-open #settings-toggle {
     position: relative;
 }
 
+#search-input-wrap {
+    position: relative;
+    flex: 1;
+}
+
+#search-autocomplete {
+    position: absolute;
+    inset: 2.1px;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #7f7878;
+    font-size: 16px;
+}
+
+#search-input {
+    position: relative;
+    width: 100%;
+    background: transparent;
+}
+
 #search-engine-list {
     position: absolute;
     top: 45px;

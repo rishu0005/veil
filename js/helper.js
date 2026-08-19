@@ -95,6 +95,7 @@ function hideStatus() {
 let selectedTabIndex = -1;
 let openTabs = [];
 let displayedTabs = [];
+let searchHistoryResults = [];
 
 async function getOpenTabs() {
     try {
@@ -117,7 +118,7 @@ async function getOpenTabs() {
 
           selectedTabIndex = -1;
 
-       renderOpenTabs(
+       renderSuggestions(
             els.searchInput.value.trim()
         );
 
@@ -187,73 +188,7 @@ function moveTabSelection(direction) {
     updateSelectedTab();
 }
 
-function renderOpenTabs(query = '') {
-  
-    const normalizedQuery = query.toLowerCase().trim();
-    let filteredTabs = openTabs;
 
-    if (normalizedQuery) {
-
-        filteredTabs = openTabs.filter(tab => {
-
-            const title =
-                (tab.title || '').toLowerCase();
-
-            const url =
-                (tab.url || '').toLowerCase();
-
-
-            return (
-                title.includes(normalizedQuery) ||
-                url.includes(normalizedQuery)
-            );
-
-        });
-
-    }
-
-   
-
-    displayedTabs = filteredTabs.slice(0, 4);
-
-    let tabsToShow = '';
-
-    if(displayedTabs.length === 0){
-      
-    }
-
-    displayedTabs.forEach((tab, index) => {
-
-        tabsToShow += `
-            <div
-                class="open-tab ${index === selectedTabIndex ? 'selected' : ''}"
-                data-tab-id="${tab.id}"
-            >
-                <div class="tab-favicon">
-                    <img
-                        src="${tab.favIconUrl || ''}"
-                        alt="${tab.title || 'Tab'}"
-                    >
-                </div>
-
-                <div class="tab-info">
-                    <div class="tab-title">
-                        ${tab.title || 'Untitled'}
-                    </div>
-
-                    <div class="tab-url">
-                        ${tab.url || ''} → Switch To Tab
-                    </div>
-                </div>
-                <div class="tab-action">
-                    ↵
-                </div>
-            </div>
-        `;
-    });
-
-    els.DisplayTabs.innerHTML = tabsToShow;
-}
 
 // ---------- Keyboard Control Functions  ----------
 
@@ -364,6 +299,126 @@ function saveSearchQuery(query) {
     );
 }
 
+
+async function renderSuggestions(query = '') {
+
+    query = query.trim();
+
+    // 1. Filter open tabs
+    const normalizedQuery = query.toLowerCase();
+
+    let filteredTabs = openTabs.filter(tab => {
+
+        const title = (tab.title || '').toLowerCase();
+        const url = (tab.url || '').toLowerCase();
+
+        return (
+            title.includes(normalizedQuery) ||
+            url.includes(normalizedQuery)
+        );
+    });
+
+    // Maximum 3 tabs
+    filteredTabs = filteredTabs.slice(0, 3);
+
+    // 2. Filter Veil search history
+    const history = getSearchHistory();
+
+    const historyResults = history
+        .filter(item =>
+            item.toLowerCase().includes(normalizedQuery)
+        )
+        .slice(0, 2);
+
+    // 3. Build ONE result list
+    let html = '';
+
+    filteredTabs.forEach((tab, index) => {
+
+        html += `
+            <div
+                class="open-tab"
+                data-tab-id="${tab.id}"
+            >
+                <div class="tab-favicon">
+                    <img
+                        src="${tab.favIconUrl || ''}"
+                        alt=""
+                    >
+                </div>
+
+                <div class="tab-info">
+                    <div class="tab-title">
+                        ${escapeHtml(tab.title || 'Untitled')}
+                    </div>
+
+                    <div class="tab-url">
+                        ${escapeHtml(tab.url || '')}
+                        → Switch To Tab
+                    </div>
+                </div>
+
+                <div class="tab-action">
+                    ↵
+                </div>
+            </div>
+        `;
+    });
+
+    historyResults.forEach(item => {
+
+        html +=  `<div
+                class="open-tab"
+                
+            >
+                <div class="tab-favicon">
+                     ⌕
+                </div>
+
+                <div class="tab-info">
+                    <div class="tab-title">
+                        ${escapeHtml(item) || 'Untitled'}
+                    </div>
+                </div>
+                <div class="tab-action">
+                    ↵
+                </div>
+            </div>
+        `;
+    });
+
+    if(historyResults.length === 0 && filteredTabs.length === 0 ){
+         html +=  `<div
+                class="open-tab"
+                
+            >
+                <div class="tab-favicon">
+                     ⌕
+                </div>
+
+                <div class="tab-info">
+                    <div class="tab-title">
+                        ${escapeHtml(query) || 'Untitled'}
+                    </div>
+                </div>
+                <div class="tab-action">
+                    ↵
+                </div>
+            </div>
+        `;
+    }
+
+    els.DisplayTabs.innerHTML = html;
+}
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
 async function performSearch(query) {
 
     if (!selectedEngine) {
@@ -380,6 +435,36 @@ async function performSearch(query) {
     });
 }
 
+function getAutocompleteSuggestion(query) {
+
+    if (!query) {
+        return '';
+    }
+
+    const history = getSearchHistory();
+
+    const normalizedQuery = query.toLowerCase();
+
+    const match = history.find(item =>
+        item.toLowerCase().startsWith(normalizedQuery)
+    );
+
+    return match || '';
+}
+
+function updateAutocomplete(query) {
+
+    const suggestion = getAutocompleteSuggestion(query);
+
+    if (!suggestion) {
+        els.autocomplete.textContent = '';
+        return;
+    }
+
+    const remaining = suggestion.slice(query.length);
+
+    els.autocomplete.textContent = query + remaining;
+}
 
 // ---------- Search Engine Function ----------
 

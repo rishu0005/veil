@@ -21,6 +21,7 @@ const els = {
   DisplayTabs : document.getElementById("display-tabs"),
   engineButton : document.getElementById("search-engine"),
   engineList : document.getElementById("search-engine-list"),
+  autocomplete : document.getElementById("search-autocomplete"),
 };
 
 let currentObjectUrl = null; // track so we can revoke it and avoid memory leaks
@@ -229,6 +230,31 @@ els.searchInput.addEventListener('keydown', async (event) =>{
     els.searchInput.blur();
     return;
   } 
+
+  if (isExactShortcut(event, {
+    code: "Tab"
+  })) {
+
+    const query = els.searchInput.value.trim();
+
+    const suggestion = getAutocompleteSuggestion(query);
+
+    if (suggestion) {
+
+        event.preventDefault();
+
+        els.searchInput.value = suggestion;
+
+        updateAutocomplete(suggestion);
+
+        els.searchInput.setSelectionRange(
+            suggestion.length,
+            suggestion.length
+        );
+    }
+
+    return;
+}
 });
 
 els.searchInput.addEventListener('input', () => {
@@ -237,8 +263,9 @@ els.searchInput.addEventListener('input', () => {
 
     // Typing a new query means nothing is selected
     selectedTabIndex = -1;
+    updateAutocomplete(query);
 
-    renderOpenTabs(query);
+    renderSuggestions(query);
 }); 
 
 els.DisplayTabs.addEventListener('click', async (event) => {
