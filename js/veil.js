@@ -199,20 +199,8 @@ els.searchInput.addEventListener('keydown', async (event) =>{
 
         if (selectedSuggestionIndex !== -1) {
 
-            const selected = displayedSuggestions[selectedSuggestionIndex];
-
-            if (selected.type === 'tab') {
-                await jumpToTab(selected.data.id);
-                return;
-            }
-
-            if (selected.type === 'search') {
-                const query = selected.data;
-                els.searchInput.value = query;
-                await performSearch(query);
-                return;
-            }
-
+           await selectSuggestion(selectedSuggestionIndex);
+          return;
           
         }
         const query = els.searchInput.value.trim();
@@ -284,17 +272,19 @@ els.searchInput.addEventListener('input', () => {
     renderSuggestions(query);
 }); 
 
-els.DisplayTabs.addEventListener('click', async (event) => {
+els.DisplayTabs.addEventListener("click", async (event) => {
 
-    const tabElement = event.target.closest('.open-tab');
-    if (!tabElement) {
+    const item = event.target.closest(".open-tab");
+    console.log(item);
+
+    if (!item) {
+      
         return;
     }
-    const tabId = Number(
-        tabElement.dataset.tabId
-    );
-    await jumpToTab(tabId);
 
+    const index = Number(item.dataset.index);
+
+    await selectSuggestion(index);
 });
 // ----------  Toggle Control Panel ----------
 window.addEventListener('keydown', (event) => {

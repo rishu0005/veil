@@ -359,6 +359,34 @@ async function performSearch(query) {
     });
 }
 
+async function selectSuggestion(index) {
+
+    if (index < 0 || index >= displayedSuggestions.length) {
+        return;
+    }
+
+    const selected = displayedSuggestions[index];
+
+    if (selected.type === "tab") {
+
+        await jumpToTab(selected.data.id);
+
+        return;
+    }
+
+    if (selected.type === "search") {
+
+        const query = selected.data;
+
+        els.searchInput.value = query;
+
+        saveSearchQuery(query);
+
+        await performSearch(query);
+
+        return;
+    }
+}
 function getAutocompleteSuggestion(query) {
 
     if (!query) {
@@ -400,7 +428,7 @@ function renderSuggestionUI(query){
             const tab = item.data;
             html += `
                 <div
-                    class="open-tab ${index === selectedSuggestionIndex ? 'selected' : ''}"
+                    class="open-tab no-decoration ${index === selectedSuggestionIndex ? 'selected' : ''}"
                     data-index="${index}"
                 >
                     <div class="tab-favicon">
@@ -509,9 +537,6 @@ async function loadSearchEngines() {
 
         renderSelectedEngine();
         renderSearchEngines();
-
-        console.log("Selected engine:", selectedEngine);
-
     } catch (error) {
 
         console.error(
