@@ -148,17 +148,21 @@ els.searchInput.addEventListener('keydown', async (event) =>{
 
      event.preventDefault();
 
-        if (displayedTabs.length === 0) {
+        if (displayedSuggestions.length === 0) {
             return;
         }
 
-        selectedTabIndex++;
-
-        if (selectedTabIndex >= displayedTabs.length) {
-            selectedTabIndex = 0;
+        if (selectedSuggestionIndex === -1) {
+            selectedSuggestionIndex = 0;
+        } else if (
+            selectedSuggestionIndex <
+            displayedSuggestions.length - 1
+        ) {
+            selectedSuggestionIndex++;
+        } else {
+            selectedSuggestionIndex = 0;
         }
-
-        updateSelectedTab();
+        renderSuggestionUI();
 
         return;
   }
@@ -168,19 +172,22 @@ els.searchInput.addEventListener('keydown', async (event) =>{
   })){
       event.preventDefault();
 
-        if (displayedTabs.length === 0) {
-            return;
-        }
+      if (displayedSuggestions.length === 0) {
+          return;
+      }
 
-        selectedTabIndex--;
+      if (selectedSuggestionIndex === -1) {
+          selectedSuggestionIndex =
+              displayedSuggestions.length - 1;
+      } else if (selectedSuggestionIndex > 0) {
+          selectedSuggestionIndex--;
+      } else {
+          selectedSuggestionIndex =
+              displayedSuggestions.length - 1;
+      }
 
-        if (selectedTabIndex < 0) {
-            selectedTabIndex = displayedTabs.length - 1;
-        }
-
-        updateSelectedTab();
-
-        return;
+      renderSuggestionUI();
+      return;
   }
 
 
@@ -190,13 +197,23 @@ els.searchInput.addEventListener('keydown', async (event) =>{
 
     event.preventDefault();
 
-        if (selectedTabIndex !== -1) {
+        if (selectedSuggestionIndex !== -1) {
 
-            const selectedTab = displayedTabs[selectedTabIndex];
+            const selected = displayedSuggestions[selectedSuggestionIndex];
 
-            await jumpToTab(selectedTab.id);
+            if (selected.type === 'tab') {
+                await jumpToTab(selected.data.id);
+                return;
+            }
 
-            return;
+            if (selected.type === 'search') {
+                const query = selected.data;
+                els.searchInput.value = query;
+                await performSearch(query);
+                return;
+            }
+
+          
         }
         const query = els.searchInput.value.trim();
 
@@ -261,8 +278,7 @@ els.searchInput.addEventListener('input', () => {
 
     const query = els.searchInput.value.trim();
 
-    // Typing a new query means nothing is selected
-    selectedTabIndex = -1;
+    selectedSuggestionIndex = -1;
     updateAutocomplete(query);
 
     renderSuggestions(query);

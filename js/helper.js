@@ -96,6 +96,8 @@ let selectedTabIndex = -1;
 let openTabs = [];
 let displayedTabs = [];
 let searchHistoryResults = [];
+let displayedSuggestions = [];
+let selectedSuggestionIndex = -1;
 
 async function getOpenTabs() {
     try {
@@ -158,37 +160,25 @@ function moveTabSelection(direction) {
         return;
     }
 
-
     // Move down
     if (direction === 'down') {
-
         selectedTabIndex++;
-
         // Loop back to first tab
         if (selectedTabIndex >= tabs.length) {
             selectedTabIndex = 0;
         }
-
     }
-
 
     // Move up
     if (direction === 'up') {
-
         selectedTabIndex--;
-
         // Loop to last tab
         if (selectedTabIndex < 0) {
             selectedTabIndex = tabs.length - 1;
         }
-
     }
-
-
     updateSelectedTab();
 }
-
-
 
 // ---------- Keyboard Control Functions  ----------
 
@@ -301,13 +291,13 @@ function saveSearchQuery(query) {
 
 
 async function renderSuggestions(query = '') {
+    const MAX_SUGGESTIONS = 5;
 
-    query = query.trim();
 
     // 1. Filter open tabs
-    const normalizedQuery = query.toLowerCase();
+    const normalizedQuery = query.toLowerCase().trim();
 
-    let filteredTabs = openTabs.filter(tab => {
+    const filteredTabs = openTabs.filter(tab => {
 
         const title = (tab.title || '').toLowerCase();
         const url = (tab.url || '').toLowerCase();
@@ -316,99 +306,33 @@ async function renderSuggestions(query = '') {
             title.includes(normalizedQuery) ||
             url.includes(normalizedQuery)
         );
-    });
-
-    // Maximum 3 tabs
-    filteredTabs = filteredTabs.slice(0, 3);
+    })
+    .slice(0, 3);
 
     // 2. Filter Veil search history
     const history = getSearchHistory();
 
-    const historyResults = history
+    const filteredHistory = history
         .filter(item =>
             item.toLowerCase().includes(normalizedQuery)
         )
+        .sort(() => Math.random() - 0.5)
         .slice(0, 2);
 
-    // 3. Build ONE result list
-    let html = '';
+    displayedSuggestions = [
+        ...filteredTabs.map( tab => ({
+            type: 'tab',
+            data: tab,
+        })),
 
-    filteredTabs.forEach((tab, index) => {
+        ...filteredHistory.map( search => ({
+            type: 'search',
+            data: search
+        }))
+    ].slice(0, MAX_SUGGESTIONS);
 
-        html += `
-            <div
-                class="open-tab"
-                data-tab-id="${tab.id}"
-            >
-                <div class="tab-favicon">
-                    <img
-                        src="${tab.favIconUrl || ''}"
-                        alt=""
-                    >
-                </div>
-
-                <div class="tab-info">
-                    <div class="tab-title">
-                        ${escapeHtml(tab.title || 'Untitled')}
-                    </div>
-
-                    <div class="tab-url">
-                        ${escapeHtml(tab.url || '')}
-                        → Switch To Tab
-                    </div>
-                </div>
-
-                <div class="tab-action">
-                    ↵
-                </div>
-            </div>
-        `;
-    });
-
-    historyResults.forEach(item => {
-
-        html +=  `<div
-                class="open-tab"
-                
-            >
-                <div class="tab-favicon">
-                     ⌕
-                </div>
-
-                <div class="tab-info">
-                    <div class="tab-title">
-                        ${escapeHtml(item) || 'Untitled'}
-                    </div>
-                </div>
-                <div class="tab-action">
-                    ↵
-                </div>
-            </div>
-        `;
-    });
-
-    if(historyResults.length === 0 && filteredTabs.length === 0 ){
-         html +=  `<div
-                class="open-tab"
-                
-            >
-                <div class="tab-favicon">
-                     ⌕
-                </div>
-
-                <div class="tab-info">
-                    <div class="tab-title">
-                        ${escapeHtml(query) || 'Untitled'}
-                    </div>
-                </div>
-                <div class="tab-action">
-                    ↵
-                </div>
-            </div>
-        `;
-    }
-
-    els.DisplayTabs.innerHTML = html;
+        selectedSuggestionIndex = -1;
+        renderSuggestionUI(normalizedQuery);
 }
 function escapeHtml(value) {
 
@@ -464,6 +388,90 @@ function updateAutocomplete(query) {
     const remaining = suggestion.slice(query.length);
 
     els.autocomplete.textContent = query + remaining;
+}
+
+function renderSuggestionUI(query){
+
+        let html = '';
+        displayedSuggestions.forEach((item, index) => {
+
+        if (item.type === 'tab') {
+
+            const tab = item.data;
+            html += `
+                <div
+                    class="open-tab ${index === selectedSuggestionIndex ? 'selected' : ''}"
+                    data-index="${index}"
+                >
+                    <div class="tab-favicon">
+                        <img
+                            src="${tab.favIconUrl || ''}"
+                            alt=""
+                        >
+                    </div>
+
+                    <div class="tab-info">
+                        <div class="tab-title">
+                            ${escapeHtml(tab.title || 'Untitled')}
+                        </div>
+
+                        <div class="tab-url">
+                            ${escapeHtml(tab.url || '')}
+                        </div>
+                    </div>
+                    <div class="tab-action">
+                        ↵
+                    </div>
+                </div>
+            `;
+
+        } else {
+
+            html += `
+                <div
+                    class="open-tab ${index === selectedSuggestionIndex ? 'selected' : ''}"
+                    data-index="${index}"
+                >
+                    <div class="tab-favicon">
+                        ⌕
+                    </div>
+
+                    <div class="tab-info">
+                        <div class="tab-title">
+                            ${escapeHtml(item.data)}
+                        </div>
+                    </div>
+                        <div class="tab-action">
+                              ↵
+                        </div>
+                </div>
+            `;
+        }
+    });
+
+
+    if(displayedSuggestions.length === 0){
+        html +=  `<div
+                class="open-tab"
+                
+            >
+                <div class="tab-favicon">
+                     ⌕
+                </div>
+
+                <div class="tab-info">
+                    <div class="tab-title">
+                        ${escapeHtml(query) || 'Untitled'}
+                    </div>
+                </div>
+                <div class="tab-action">
+                    ↵
+                </div>
+            </div>
+        `;
+    }
+
+    els.DisplayTabs.innerHTML = html;
 }
 
 // ---------- Search Engine Function ----------
