@@ -1,184 +1,10 @@
+import { els } from "../veil.js";
+import { getMedia} from "./storage/db.js";
+import { setClockVisible} from "./bg-wallpaper/clock.js";
+import { renderMedia} from "./bg-wallpaper/wallpaper.js";
+
 let searchEngines = [];
 let selectedEngine = null;
-// ----------  Rendering Functions ----------
-
-function clearBackground() {
-  els.bgVideo.pause();
-  els.bgVideo.removeAttribute("src");
-  els.bgVideo.load();
-  els.bgVideo.style.display = "none";
-
-  els.bgImage.style.backgroundImage = "";
-  els.bgImage.style.display = "none";
-
-  if (currentObjectUrl) {
-    URL.revokeObjectURL(currentObjectUrl);
-    currentObjectUrl = null;
-  }
-}
-
-function renderMedia(record) {
-  clearBackground();
-
-  if (!record) {
-    els.emptyState.classList.remove("hidden");
-    return;
-  }
-
-  els.emptyState.classList.add("hidden");
-  currentObjectUrl = URL.createObjectURL(record.file);
-
-  if (record.type.startsWith("video/")) {
-    els.bgVideo.preload = "auto";
-    els.bgVideo.src = currentObjectUrl;
-
-    const showAndPlay = () => {
-      els.bgVideo.style.display = "block";
-      els.bgVideo.play().catch(() => {});
-    };
-
-    if (isFullyBuffered(els.bgVideo)) {
-      showAndPlay();
-    } else {
-      els.bgVideo.addEventListener("canplaythrough", showAndPlay, { once: true });
-      els.bgVideo.load();
-    }
-  } else {
-    els.bgImage.style.backgroundImage = `url("${currentObjectUrl}")`;
-    els.bgImage.style.display = "block";
-  }
-}
-
-function isFullyBuffered(video) {
-  const buffered = video.buffered;
-  if (!buffered.length || !video.duration) return false;
-  return buffered.end(buffered.length - 1) >= video.duration - 0.1;
-}
-
-function renderClock() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  els.clockTime.textContent = `${hh}:${mm}`;
-  els.clockDate.textContent = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-let clockInterval = null;
-function setClockVisible(visible) {
-  els.clockWrap.classList.toggle("hidden", !visible);
-  if (visible) {
-    renderClock();
-    if (!clockInterval) clockInterval = setInterval(renderClock, 1000 * 15);
-  } else if (clockInterval) {
-    clearInterval(clockInterval);
-    clockInterval = null;
-  }
-}
-
-// ---------- Status messages ----------
-
-function showStatus(message, kind) {
-  els.uploadStatus.textContent = message;
-  els.uploadStatus.className = `status ${kind}`;
-  els.uploadStatus.classList.remove("hidden");
-}
-
-function hideStatus() {
-  els.uploadStatus.classList.add("hidden");
-} 
-
-// ---------- Tab Functions ----------
-let selectedTabIndex = -1;
-let openTabs = [];
-let displayedTabs = [];
-let searchHistoryResults = [];
-let displayedSuggestions = [];
-let selectedSuggestionIndex = -1;
-
-async function getOpenTabs() {
-    try {
-        const tabs = await browser.tabs.query({});
-
-         if (tabs.length === 0) {
-            openTabs = [];
-            displayedTabs = [];
-            els.DisplayTabs.innerHTML = '';
-            console.log("No tabs found.");
-            return;
-        }
-
-        const activeTab = tabs.find(tab => tab.active);
-       
-        openTabs = tabs
-                  .filter(tab => tab.id !== activeTab?.id)
-                  .sort(() => Math.random() - 0.5);
-                  // .slice(0, 4);
-
-          selectedTabIndex = -1;
-
-       renderSuggestions(
-            els.searchInput.value.trim()
-        );
-
-    } catch (error) {
-        console.error("Error getting tabs:", error);
-    }
-}
-
-async function jumpToTab(targetTabId) {
-  try {
-    let tab = await browser.tabs.get(targetTabId);
-    await browser.tabs.update(targetTabId, { active: true });
-
-    await browser.windows.update(tab.windowId, { focused: true });
-  } catch (error) {
-    console.error("Failed to jump to tab:", error);
-  }
-}
-
-
-function updateSelectedTab() {
-    const tabs = els.DisplayTabs.querySelectorAll('.open-tab');
-
-    tabs.forEach((tab, index) => {
-        tab.classList.toggle(
-            'selected',
-            index === selectedTabIndex
-        );
-    });
-}
-
-function moveTabSelection(direction) {
-
-    const tabs = els.DisplayTabs.querySelectorAll('.open-tab');
-
-    if (tabs.length === 0) {
-        return;
-    }
-
-    // Move down
-    if (direction === 'down') {
-        selectedTabIndex++;
-        // Loop back to first tab
-        if (selectedTabIndex >= tabs.length) {
-            selectedTabIndex = 0;
-        }
-    }
-
-    // Move up
-    if (direction === 'up') {
-        selectedTabIndex--;
-        // Loop to last tab
-        if (selectedTabIndex < 0) {
-            selectedTabIndex = tabs.length - 1;
-        }
-    }
-    updateSelectedTab();
-}
 
 // ---------- Keyboard Control Functions  ----------
 
@@ -225,36 +51,7 @@ document.body.classList.toggle("hover-reveal", hoverReveal);
 
 
 // ---------- Search Function ----------
-function isUrl(query) {
 
-    query = query.trim();
-
-    // Already has a protocol
-    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(query)) {
-        return true;
-    }
-
-    // localhost
-    if (/^localhost(?::\d+)?(?:\/.*)?$/i.test(query)) {
-        return true;
-    }
-
-    // IPv4 address
-    if (
-        /^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(query)
-    ) {
-        return true;
-    }
-
-    // Domain name
-    if (
-        /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d+)?(?:\/.*)?$/i.test(query)
-    ) {
-        return true;
-    }
-
-    return false;
-}
 
 function getSearchHistory() {
     return JSON.parse(
@@ -380,8 +177,14 @@ async function selectSuggestion(index) {
 
         els.searchInput.value = query;
 
-        saveSearchQuery(query);
-
+        if (isUrl(query)) {
+            let url = query;
+            if (!/^https?:\/\//i.test(url)) {
+                url = "https://" + url;
+            }
+            window.location.href = url;
+            return;
+        }
         await performSearch(query);
 
         return;
@@ -480,7 +283,7 @@ function renderSuggestionUI(query){
 
     if(displayedSuggestions.length === 0){
         html +=  `<div
-                class="open-tab"
+                class="open-tab selected"
                 
             >
                 <div class="tab-favicon">
@@ -606,3 +409,6 @@ async function startVeil() {
     await loadSearchEngines();
     await init();
 }
+
+
+export {startVeil, isExactShortcut, renderSuggestionUI, selectSuggestion, saveSearchQuery, isUrl, performSearch,  }

@@ -402,8 +402,10 @@ body.hover-reveal.settings-panel-open #settings-toggle {
 }
 
 .open-tab:hover .tab-action,
+.open-tab.selected .tab-action,
 .open-tab.active .tab-action {
-    opacity: 1;
+    opacity: 1 !important
+    
 }
 
 /* --- Buttons --- */

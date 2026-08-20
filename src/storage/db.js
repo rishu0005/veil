@@ -1,4 +1,4 @@
-    /**
+ /**
  * Tiny promise-based IndexedDB wrapper for storing a single
  * "current wallpaper" media file (image or video).
  *
@@ -75,3 +75,5 @@ async function clearMedia() {
     tx.onerror = () => reject(tx.error);
   });
 }
+
+export { saveMedia,  getMedia, clearMedia}

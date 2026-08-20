@@ -1,0 +1,15 @@
+Wait for Finishing Touch — Search module cleanup
+- Unify storage
+- Extract search logic from helper.js
+- Remove dead search-engine functions
+- Review duplicate state variables
+- Final search-module refactor before stable release
+- make the component movable
+
+Future Addons :-
+
+1) Implement Quick Links Commands- !yt in search bar -> opens youtube
+2) Let user Add Their own Quick Commands to replace shortcuts 
+3) Simple 'Notes' modules we could use our search to open Notes Interface 
+4) !closed show recently closed pages
+

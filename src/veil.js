@@ -1,3 +1,13 @@
+import { startVeil, isExactShortcut, renderSuggestionUI, selectSuggestion, 
+saveSearchQuery, isUrl, performSearch, 
+  
+} from "./js/helper.js";
+
+import { saveMedia,  getMedia, clearMedia} from "./storage/db.js";
+import { setClockVisible} from "./bg-wallpaper/clock.js";
+import { showStatus, hideStatus} from "./bg-wallpaper/status.js";
+import { renderMedia} from "./bg-wallpaper/wallpaper.js";
+
 const MAX_VIDEO_BYTES = 300 * 1024 * 1024; // 300MB
 const MAX_IMAGE_BYTES = 300 * 1024 * 1024; // 300MB
 const MAX_SEARCH_HISTORY = 50;
@@ -112,10 +122,7 @@ els.clockToggle.addEventListener("change", async (e) => {
   await browser.storage.local.set({ showClock: enabled });
 });
 
-
-
 els.bgVideo.loop = false;
-
 els.bgVideo.addEventListener('ended', () => {
   els.bgVideo.currentTime = 0;
   els.bgVideo.play().catch(() => {
@@ -278,7 +285,7 @@ els.DisplayTabs.addEventListener("click", async (event) => {
     console.log(item);
 
     if (!item) {
-      
+
         return;
     }
 
@@ -331,3 +338,5 @@ els.engineButton.addEventListener("click", (event) => {
 
 // ---------- Init ----------
 startVeil();
+
+export { els };
