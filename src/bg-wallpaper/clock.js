@@ -1,4 +1,6 @@
 
+import { els } from "../veil.js";
+
 function renderClock() {
   const now = new Date();
   const hh = String(now.getHours()).padStart(2, "0");

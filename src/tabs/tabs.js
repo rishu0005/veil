@@ -1,10 +1,11 @@
-
+import { els } from "../veil.js";
+import { getSearchHistory, renderSuggestionUI} from "../search/search.js";
 let selectedTabIndex = -1;
 let openTabs = [];
 let displayedTabs = [];
-let searchHistoryResults = [];
 let displayedSuggestions = [];
 let selectedSuggestionIndex = -1;
+
 
 async function getOpenTabs() {
     try {
@@ -34,6 +35,51 @@ async function getOpenTabs() {
     } catch (error) {
         console.error("Error getting tabs:", error);
     }
+}
+
+async function renderSuggestions(query = '') {
+    const MAX_SUGGESTIONS = 5;
+
+
+    // 1. Filter open tabs
+    const normalizedQuery = query.toLowerCase().trim();
+
+    const filteredTabs = openTabs.filter(tab => {
+
+        const title = (tab.title || '').toLowerCase();
+        const url = (tab.url || '').toLowerCase();
+
+        return (
+            title.includes(normalizedQuery) ||
+            url.includes(normalizedQuery)
+        );
+    })
+    .slice(0, 3);
+
+    // 2. Filter Veil search history
+    const history = getSearchHistory();
+
+    const filteredHistory = history
+        .filter(item =>
+            item.toLowerCase().includes(normalizedQuery)
+        )
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2);
+
+    displayedSuggestions = [
+        ...filteredTabs.map( tab => ({
+            type: 'tab',
+            data: tab,
+        })),
+
+        ...filteredHistory.map( search => ({
+            type: 'search',
+            data: search
+        }))
+    ].slice(0, MAX_SUGGESTIONS);
+
+        selectedSuggestionIndex = -1;
+        renderSuggestionUI(normalizedQuery);
 }
 
 async function jumpToTab(targetTabId) {
@@ -86,3 +132,23 @@ function moveTabSelection(direction) {
     }
     updateSelectedTab();
 }
+
+
+export function getSelectedSuggestionIndex() {
+  return selectedSuggestionIndex;
+}
+
+export function setSelectedSuggestionIndex(index) {
+  selectedSuggestionIndex = index;
+}
+export function getSelectedTabIndex() {
+  return selectedTabIndex;
+}
+
+export function setSelectedTabIndex(index) {
+  selectedTabIndex = index;
+}
+
+export { getOpenTabs, renderSuggestions, displayedSuggestions,  selectedSuggestionIndex,
+        jumpToTab, moveTabSelection
+ };

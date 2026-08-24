@@ -1,17 +1,17 @@
-import { startVeil, isExactShortcut, renderSuggestionUI, selectSuggestion, 
-saveSearchQuery, isUrl, performSearch, 
-  
-} from "./js/helper.js";
-
+import { startVeil, isExactShortcut } from "./js/helper.js";
+import { isUrl } from "./utils/url.js";
 import { saveMedia,  getMedia, clearMedia} from "./storage/db.js";
-import { setClockVisible} from "./bg-wallpaper/clock.js";
+import { setClockVisible } from "./bg-wallpaper/clock.js";
 import { showStatus, hideStatus} from "./bg-wallpaper/status.js";
-import { renderMedia} from "./bg-wallpaper/wallpaper.js";
+import { renderMedia } from "./bg-wallpaper/wallpaper.js";
+import { getOpenTabs, renderSuggestions, displayedSuggestions, setSelectedSuggestionIndex, 
+         getSelectedSuggestionIndex, setSelectedTabIndex,   } from "./tabs/tabs.js";
+import { updateAutocomplete, saveSearchQuery, performSearch,
+         getAutocompleteSuggestion, renderSuggestionUI, selectSuggestion } from "./search/search.js";
+
 
 const MAX_VIDEO_BYTES = 300 * 1024 * 1024; // 300MB
 const MAX_IMAGE_BYTES = 300 * 1024 * 1024; // 300MB
-const MAX_SEARCH_HISTORY = 50;
-
 const els = {
   bgVideo: document.getElementById("bg-video"),
   bgImage: document.getElementById("bg-image"),
@@ -33,10 +33,6 @@ const els = {
   engineList : document.getElementById("search-engine-list"),
   autocomplete : document.getElementById("search-autocomplete"),
 };
-
-let currentObjectUrl = null; // track so we can revoke it and avoid memory leaks
-
-
 
 // ---------- Settings panel ----------
 
@@ -159,15 +155,15 @@ els.searchInput.addEventListener('keydown', async (event) =>{
             return;
         }
 
-        if (selectedSuggestionIndex === -1) {
-            selectedSuggestionIndex = 0;
+        if (getSelectedSuggestionIndex() === -1) {
+            setSelectedSuggestionIndex(0);
         } else if (
-            selectedSuggestionIndex <
+            getSelectedSuggestionIndex() <
             displayedSuggestions.length - 1
         ) {
-            selectedSuggestionIndex++;
+            setSelectedSuggestionIndex(getSelectedSuggestionIndex() + 1);
         } else {
-            selectedSuggestionIndex = 0;
+            setSelectedSuggestionIndex(0);
         }
         renderSuggestionUI();
 
@@ -183,14 +179,12 @@ els.searchInput.addEventListener('keydown', async (event) =>{
           return;
       }
 
-      if (selectedSuggestionIndex === -1) {
-          selectedSuggestionIndex =
-              displayedSuggestions.length - 1;
-      } else if (selectedSuggestionIndex > 0) {
-          selectedSuggestionIndex--;
+      if (getSelectedSuggestionIndex() === -1) {
+          setSelectedSuggestionIndex(displayedSuggestions.length - 1);
+      } else if (getSelectedSuggestionIndex() > 0) {
+          setSelectedSuggestionIndex(getSelectedSuggestionIndex() - 1);
       } else {
-          selectedSuggestionIndex =
-              displayedSuggestions.length - 1;
+          setSelectedSuggestionIndex(displayedSuggestions.length - 1);
       }
 
       renderSuggestionUI();
@@ -204,9 +198,9 @@ els.searchInput.addEventListener('keydown', async (event) =>{
 
     event.preventDefault();
 
-        if (selectedSuggestionIndex !== -1) {
+        if (getSelectedSuggestionIndex() !== -1) {
 
-           await selectSuggestion(selectedSuggestionIndex);
+           await selectSuggestion(getSelectedSuggestionIndex());
           return;
           
         }
@@ -236,9 +230,9 @@ els.searchInput.addEventListener('keydown', async (event) =>{
     code: 'Escape'
   })){
     els.searchInput.value = "";
-      selectedTabIndex = -1;
+      setSelectedTabIndex(-1);
         // updateSelectedTab();
-    renderOpenTabs("");
+    getOpenTabs("");
     els.searchInput.blur();
     return;
   } 
@@ -273,7 +267,7 @@ els.searchInput.addEventListener('input', () => {
 
     const query = els.searchInput.value.trim();
 
-    selectedSuggestionIndex = -1;
+    setSelectedSuggestionIndex(-1);
     updateAutocomplete(query);
 
     renderSuggestions(query);

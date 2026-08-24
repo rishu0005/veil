@@ -1,4 +1,6 @@
 // ----------  Rendering Functions ----------
+import { els } from "../veil.js";
+let currentObjectUrl = null; 
 
 function clearBackground() {
   els.bgVideo.pause();

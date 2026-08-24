@@ -28,3 +28,5 @@ function isUrl(query) {
 
     return false;
 }
+
+export {isUrl}
