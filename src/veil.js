@@ -231,8 +231,6 @@ els.searchInput.addEventListener('keydown', async (event) =>{
   })){
     els.searchInput.value = "";
       setSelectedTabIndex(-1);
-        // updateSelectedTab();
-    getOpenTabs("");
     els.searchInput.blur();
     return;
   } 

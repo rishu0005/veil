@@ -13,3 +13,17 @@ Future Addons :-
 3) Simple 'Notes' modules we could use our search to open Notes Interface 
 4) !closed show recently closed pages
 
+              VEIL
+                │
+        ┌───────┴────────┐
+        │                │
+     CURRENT          FUTURE
+        │                │
+        ↓                ↓
+   Wallpaper        Quick Links
+   Search            Notes
+   History           Commands
+   Autocomplete      Customization
+   Open Tabs         Component Layout
+   URL Detection     UI Polish
+   Search Engine
