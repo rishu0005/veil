@@ -1,4 +1,4 @@
-import { els } from "../veil.js";
+import { els } from "../js/dom.js";
 // ---------- Status messages ----------
 
 function showStatus(message, kind) {

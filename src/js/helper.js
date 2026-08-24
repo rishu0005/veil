@@ -1,4 +1,4 @@
-import { els } from "../veil.js";
+import { els } from "../js/dom.js";
 import { getMedia} from "../storage/db.js";
 import { setClockVisible} from "../bg-wallpaper/clock.js";
 import { renderMedia} from "../bg-wallpaper/wallpaper.js";

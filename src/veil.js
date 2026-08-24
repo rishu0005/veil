@@ -1,5 +1,5 @@
 import { startVeil, isExactShortcut } from "./js/helper.js";
-import { isUrl } from "./utils/url.js";
+import { isUrl, openUrl } from "./utils/url.js";
 import { saveMedia,  getMedia, clearMedia} from "./storage/db.js";
 import { setClockVisible } from "./bg-wallpaper/clock.js";
 import { showStatus, hideStatus} from "./bg-wallpaper/status.js";
@@ -9,30 +9,13 @@ import { getOpenTabs, renderSuggestions, displayedSuggestions, setSelectedSugges
 import { updateAutocomplete, saveSearchQuery, performSearch,
          getAutocompleteSuggestion, renderSuggestionUI, selectSuggestion } from "./search/search.js";
 
+import { parseQuery } from "./search/parseQuery.js";
+import { executeCommand } from "./search/command.js";
+import { els} from "./js/dom.js";
 
 const MAX_VIDEO_BYTES = 300 * 1024 * 1024; // 300MB
 const MAX_IMAGE_BYTES = 300 * 1024 * 1024; // 300MB
-const els = {
-  bgVideo: document.getElementById("bg-video"),
-  bgImage: document.getElementById("bg-image"),
-  emptyState: document.getElementById("empty-state"),
-  clockWrap: document.getElementById("clock-wrap"),
-  clockTime: document.getElementById("clock-time"),
-  clockDate: document.getElementById("clock-date"),
-  settingsToggle: document.getElementById("settings-toggle"),
-  settingsPanel: document.getElementById("settings-panel"),
-  fileInput: document.getElementById("file-input"),
-  uploadStatus: document.getElementById("upload-status"),
-  clockToggle: document.getElementById("clock-toggle"),
-  removeMediaBtn: document.getElementById("remove-media"),
-  hoverRevealToggle: document.getElementById("hover-reveal-toggle"),
-  searchWrap : document.getElementById("search-wrap"),
-  searchInput : document.getElementById("search-input"),
-  DisplayTabs : document.getElementById("display-tabs"),
-  engineButton : document.getElementById("search-engine"),
-  engineList : document.getElementById("search-engine-list"),
-  autocomplete : document.getElementById("search-autocomplete"),
-};
+
 
 // ---------- Settings panel ----------
 
@@ -210,20 +193,27 @@ els.searchInput.addEventListener('keydown', async (event) =>{
             return;
         }
 
-        saveSearchQuery(query);
+      saveSearchQuery(query);
 
-      if (isUrl(query)) {
-          let url = query;
+      const result = parseQuery(query);
 
-          if (!/^https?:\/\//i.test(url)) {
-              url = "https://" + url;
-          }
+      switch(result.type){
+        case "url":
+          openUrl(result.value);
+          break;
+        
+        case "search":
+          await  performSearch(result.value);
+          break;
+        
+        case "command":
+          executeCommand(result.value);
+          break
 
-          window.location.href = url;
-          return;
+
+        case "empty":
+          break;   
       }
-
-      await performSearch(query);
   }
   
   if(isExactShortcut(event, {

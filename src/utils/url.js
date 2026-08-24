@@ -29,4 +29,15 @@ function isUrl(query) {
     return false;
 }
 
-export {isUrl}
+function openUrl(query){
+      let url = query;
+
+          if (!/^https?:\/\//i.test(url)) {
+              url = "https://" + url;
+          }
+          console.log(url);
+          window.location.href = url;
+          return;
+}
+
+export {isUrl, openUrl}

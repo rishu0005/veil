@@ -1,5 +1,5 @@
 
-import { els } from "../veil.js";
+import { els } from "../js/dom.js";
 
 function renderClock() {
   const now = new Date();

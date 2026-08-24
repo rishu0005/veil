@@ -1,6 +1,6 @@
 
 // ---------- Search Function ----------
-import { els } from "../veil.js";
+import { els } from "../js/dom.js";
 import { isUrl } from "../utils/url.js";
 import { displayedSuggestions, selectedSuggestionIndex, jumpToTab, getSelectedSuggestionIndex  } from "../tabs/tabs.js";
 import {selectedEngine} from './engine.js';

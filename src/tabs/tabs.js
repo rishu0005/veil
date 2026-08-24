@@ -1,4 +1,4 @@
-import { els } from "../veil.js";
+import { els } from "../js/dom.js";
 import { getSearchHistory, renderSuggestionUI} from "../search/search.js";
 let selectedTabIndex = -1;
 let openTabs = [];

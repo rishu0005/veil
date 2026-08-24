@@ -1,5 +1,5 @@
 // ----------  Rendering Functions ----------
-import { els } from "../veil.js";
+import { els } from "../js/dom.js";
 let currentObjectUrl = null; 
 
 function clearBackground() {
