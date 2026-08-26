@@ -6,6 +6,7 @@
     <title>Veil</title>
     <link rel="shortcut icon" href="icons/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="css/quicklink.css"/>
 </head>
 <body>
       <video id="bg-video" class="unselectable" autoplay  muted playsinline ></video>
@@ -101,9 +102,125 @@
     <p class="hint mb-3">Video limit: 300MB. Uploading a new file replaces the current wallpaper.</p>
     <p class="hint  ">Use<code class="mark">Ctrl + shift + /</code>to open and close control panel.</p>
   </div>
- 
-  <script type="module" src="./src/veil.js"></script>
 
-    
+  <div id="quickLinksOverlay" class="quick-links-overlay hidden">
+    <div class="quick-links-panel">
+        <div class="quick-links-header">
+            <div>
+                <h2>Quick Links</h2>
+                <p>Save shortcuts for your frequently used websites.</p>
+            </div>
+
+            <button
+                id="closeQuickLinks"
+                class="quick-links-close"
+                type="button"
+                aria-label="Close">
+                ×
+            </button>
+        </div>
+
+
+        <!-- LIST VIEW -->
+        <div id="quickLinksListView">
+            <div class="quick-links-toolbar">
+                <span id="quickLinksCount">0 links</span>
+                <button
+                    id="addQuickLink"
+                    class="quick-links-add"
+                    type="button">
+                    + Add Quick Link
+                </button>
+            </div>
+
+            <div id="quickLinksList" class="quick-links-list">
+                <!-- Generated dynamically -->
+            </div>
+
+        </div>
+
+
+        <!-- FORM VIEW -->
+        <form id="quickLinkForm" class="quick-link-form hidden">
+
+            <div class="quick-link-form-header">
+                <button
+                    id="backToQuickLinks"
+                    type="button"
+                    class="quick-link-back">
+                    ← Back
+                </button>
+
+                <h3 id="quickLinkFormTitle">
+                    Add Quick Link
+                </h3>
+            </div>
+
+            <div class="quick-link-field">
+                <label for="quickLinkKeyword">
+                    Keyword
+                </label>
+
+                <input
+                    id="quickLinkKeyword"
+                    type="text"
+                    placeholder="github"
+                    autocomplete="off"
+                    required>
+                <span class="quick-link-hint">
+                    Example: github
+                </span>
+            </div>
+
+            <div class="quick-link-field">
+                <label for="quickLinkUrl">
+                    URL
+                </label>
+
+                <input
+                    id="quickLinkUrl"
+                    type="text"
+                    placeholder="https://github.com"
+                    autocomplete="off"
+                    required>
+            </div>
+
+            <div class="quick-link-field">
+                <label for="quickLinkDescription">
+                    Description
+                </label>
+
+                <input
+                    id="quickLinkDescription"
+                    type="text"
+                    placeholder="GitHub"
+                    autocomplete="off">
+            </div>
+
+            <div
+                id="quickLinkFormMessage"
+                class="quick-link-form-message hidden">
+            </div>
+
+            <div class="quick-link-form-actions">
+                <button
+                    id="cancelQuickLink"
+                    type="button"
+                    class="quick-link-cancel">
+                    Cancel
+                </button>
+
+                <button
+                    id="saveQuickLink"
+                    type="submit"
+                    class="quick-link-save">
+                    Save Quick Link
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+ 
+  <script type="module" src="./src/veil.js"></script>   
 </body>
 </html>

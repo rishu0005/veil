@@ -1,5 +1,5 @@
 import { startVeil, isExactShortcut } from "./js/helper.js";
-import { isUrl, openUrl } from "./utils/url.js";
+import { openUrl } from "./utils/url.js";
 import { saveMedia,  getMedia, clearMedia} from "./storage/db.js";
 import { setClockVisible } from "./bg-wallpaper/clock.js";
 import { showStatus, hideStatus} from "./bg-wallpaper/status.js";
@@ -11,10 +11,10 @@ import { updateAutocomplete, saveSearchQuery, performSearch,
 
 import { parseQuery } from "./search/parseQuery.js";
 import { executeCommand } from "./search/command.js";
-import { els} from "./js/dom.js";
+import { executeQuickLink } from "./storage/quicklink.js"
 
-const MAX_VIDEO_BYTES = 300 * 1024 * 1024; // 300MB
-const MAX_IMAGE_BYTES = 300 * 1024 * 1024; // 300MB
+import { CONSTANTS } from "./constants/constants.js";
+import { els} from "./js/dom.js";
 
 
 // ---------- Settings panel ----------
@@ -56,12 +56,12 @@ els.fileInput.addEventListener("change", async (e) => {
     return;
   }
 
-  if (isVideo && file.size > MAX_VIDEO_BYTES) {
+  if (isVideo && file.size > CONSTANTS.max_video_bytes) {
     const mb = (file.size / (1024 * 1024)).toFixed(1);
     showStatus(`Video is ${mb}MB — the limit is 300MB.`, "error");
     return;
   }
-  if (isImage && file.size > MAX_IMAGE_BYTES) {
+  if (isImage && file.size > CONSTANTS.max_image_bytes) {
     const mb = (file.size / (1024 * 1024)).toFixed(1);
     showStatus(`Image is ${mb}MB — the limit is 300MB.`, "error");
     return;
@@ -209,6 +209,9 @@ els.searchInput.addEventListener('keydown', async (event) =>{
         case "command":
           executeCommand(result.value);
           break
+        case "quicklink":
+          executeQuickLink(result.value);
+          break;
 
 
         case "empty":
@@ -320,5 +323,3 @@ els.engineButton.addEventListener("click", (event) => {
 
 // ---------- Init ----------
 startVeil();
-
-export { els };

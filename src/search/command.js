@@ -1,8 +1,11 @@
+import { openQuickLinks } from "../quicklinks/quicklinks.js";
+
 const commands = [
     'notes',
     'console',
     'tab',
     'history',
+    'quicklinks'
 ];
 
 function executeCommand(query){
@@ -39,6 +42,10 @@ function executeCommand(query){
 
         case 'history':
          console.log('history command executed');
+         break;
+        case 'quicklinks':
+         openQuickLinks();
+         console.log('quickLinks command executed');
          break;
 
     }

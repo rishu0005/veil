@@ -33,6 +33,15 @@ function parseQuery(query){
         }
     }
 
+    if(query.startsWith(">")){
+        let quicklink = query.slice(1).trim();
+    
+        return {
+            type: "quicklink",
+            value: quicklink    
+        }
+    }
+
     return {
         type: "search",
         value: query    
