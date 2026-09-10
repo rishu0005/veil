@@ -2,6 +2,7 @@ export const CONSTANTS = {
     max_video_bytes: 300 * 1024 * 1024 , // 300mb
     max_image_bytes: 300 * 1024 * 1024, // 300mb
     max_quick_links: 50,
+    max_notes: 50,
     default_quick_links: {
       yt: {
         keyword: "yt",
@@ -22,6 +23,12 @@ export const CONSTANTS = {
         keyword: "cl",
         url: "https://claude.ai/",
         description: "Open Claude",
+      }
+    },
+    default_notes: {
+      yt: {
+        title: "Note title",
+        body: "This is note body",
       }
     },
 

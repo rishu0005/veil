@@ -48,6 +48,11 @@ document.body.classList.toggle("hover-reveal", hoverReveal);
   }
 }
 
+function capitalizeFirstLetter(text) {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 // ---------- Start Function ----------
 async function startVeil() {
     await loadSearchEngines();
@@ -55,4 +60,4 @@ async function startVeil() {
 }
 
 
-export {startVeil, isExactShortcut }
+export {startVeil, isExactShortcut, capitalizeFirstLetter }

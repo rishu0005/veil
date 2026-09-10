@@ -18,6 +18,26 @@ const els = {
   engineButton : document.getElementById("search-engine"),
   engineList : document.getElementById("search-engine-list"),
   autocomplete : document.getElementById("search-autocomplete"),
+  overlay: document.getElementById("notesOverlay"),
+  close: document.getElementById("closeNotes"),
+  listView: document.getElementById("notesListView"),
+  list: document.getElementById("notesList"),
+  count: document.getElementById("notesCount"),
+  add: document.getElementById("addNote"),
+  view: document.getElementById("noteView"),
+  backToNotes: document.getElementById("backToNotes"),
+  edit: document.getElementById("editNote"),
+  delete: document.getElementById("deleteNote"),
+  viewTitle: document.getElementById("viewNoteTitle"),
+  viewDescription: document.getElementById("viewNoteDescription"),
+  form: document.getElementById("noteForm"),
+  formTitle: document.getElementById("noteFormTitle"),
+  backFromForm: document.getElementById("backFromNoteForm"),
+  title: document.getElementById("noteTitle"),
+  description: document.getElementById("noteDescription"),
+  message: document.getElementById("noteFormMessage"),
+  cancel: document.getElementById("cancelNote"),
+  save: document.getElementById("saveNote")
 };
 
 export {els }

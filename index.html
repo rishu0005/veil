@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="icons/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css"/>
     <link rel="stylesheet" href="css/quicklink.css"/>
+    <link rel="stylesheet" href="css/notes.css"/>
 </head>
 <body>
       <video id="bg-video" class="unselectable" autoplay  muted playsinline ></video>
@@ -219,6 +220,180 @@
             </div>
         </form>
     </div>
+</div>
+
+<div id="notesOverlay" class="notes-overlay hidden">
+
+    <div class="notes-panel">
+
+        <!-- HEADER -->
+        <div class="notes-header">
+
+            <div>
+                <h2>Notes</h2>
+                <p>Keep your thoughts and useful information.</p>
+            </div>
+
+            <button
+                id="closeNotes"
+                class="notes-close"
+                type="button"
+                aria-label="Close">
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- LIST VIEW -->
+        <div id="notesListView">
+
+            <div class="notes-toolbar">
+
+                <span id="notesCount">
+                    0 notes
+                </span>
+
+                <button
+                    id="addNote"
+                    class="notes-add"
+                    type="button">
+                    + New Note
+                </button>
+
+            </div>
+
+
+            <div
+                id="notesList"
+                class="notes-list">
+
+                <!-- Notes generated dynamically -->
+
+            </div>
+
+        </div>
+
+
+        <!-- VIEW NOTE -->
+        <div
+            id="noteView"
+            class="note-view hidden">
+
+            <div class="note-view-header">
+
+                <button
+                    id="backToNotes"
+                    type="button"
+                    class="note-back">
+                    ← Back
+                </button>
+
+                <div class="note-actions">
+
+                    <button
+                        id="editNote"
+                        type="button">
+                        Edit
+                    </button>
+
+                    <button
+                        id="deleteNote"
+                        type="button">
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <h3 id="viewNoteTitle"></h3>
+
+            <div id="viewNoteDescription"></div>
+
+        </div>
+
+
+        <!-- FORM VIEW -->
+        <form
+            id="noteForm"
+            class="note-form hidden">
+
+            <div class="note-form-header">
+
+                <button
+                    id="backFromNoteForm"
+                    type="button"
+                    class="note-back">
+                    ← Back
+                </button>
+
+                <h3 id="noteFormTitle">
+                    New Note
+                </h3>
+
+            </div>
+
+
+            <div class="note-field">
+
+                <label for="noteTitle">
+                    Title
+                </label>
+
+                <input
+                    id="noteTitle"
+                    type="text"
+                    placeholder="Shopping"
+                    autocomplete="off"
+                    required>
+
+            </div>
+
+
+            <div class="note-field">
+
+                <label for="noteDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="noteDescription"
+                    placeholder="Write your note..."
+                    required></textarea>
+
+            </div>
+
+
+            <div
+                id="noteFormMessage"
+                class="note-form-message hidden">
+            </div>
+
+
+            <div class="note-form-actions">
+
+                <button
+                    id="cancelNote"
+                    type="button"
+                    class="note-cancel">
+                    Cancel
+                </button>
+
+                <button
+                    id="saveNote"
+                    type="submit"
+                    class="note-save">
+                    Save Note
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
 </div>
  
   <script type="module" src="./src/veil.js"></script>   

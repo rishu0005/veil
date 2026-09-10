@@ -4,21 +4,22 @@ import { saveMedia,  getMedia, clearMedia} from "./storage/db.js";
 import { setClockVisible } from "./bg-wallpaper/clock.js";
 import { showStatus, hideStatus} from "./bg-wallpaper/status.js";
 import { renderMedia } from "./bg-wallpaper/wallpaper.js";
-import { getOpenTabs, renderSuggestions, displayedSuggestions, setSelectedSuggestionIndex, 
-         getSelectedSuggestionIndex, setSelectedTabIndex,   } from "./tabs/tabs.js";
-import { updateAutocomplete, saveSearchQuery, performSearch,
-         getAutocompleteSuggestion, renderSuggestionUI, selectSuggestion } from "./search/search.js";
-
+import { getOpenTabs, renderSuggestions, displayedSuggestions, setSelectedSuggestionIndex, getSelectedSuggestionIndex, setSelectedTabIndex,   } from "./tabs/tabs.js";
+import { updateAutocomplete, saveSearchQuery, performSearch, getAutocompleteSuggestion, renderSuggestionUI, selectSuggestion } from "./search/search.js";
 import { parseQuery } from "./search/parseQuery.js";
 import { executeCommand } from "./search/command.js";
 import { executeQuickLink } from "./storage/quicklink.js"
-
 import { CONSTANTS } from "./constants/constants.js";
 import { els} from "./js/dom.js";
+// import { getAllNotes, getNote, createNote, updateNote, deleteNote } from "./storage/notes.js";
+import {openNotes, closeNotes} from './notes/notes.js';
 
 
 // ---------- Settings panel ----------
-
+window.notesTest = {
+    openNotes,
+    closeNotes
+};
 els.settingsToggle.addEventListener("click", () => {
   els.settingsPanel.classList.toggle("hidden");
   document.body.classList.toggle("settings-panel-open", !els.settingsPanel.classList.contains("hidden"));

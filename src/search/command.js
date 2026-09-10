@@ -2,9 +2,6 @@ import { openQuickLinks } from "../quicklinks/quicklinks.js";
 
 const commands = [
     'notes',
-    'console',
-    'tab',
-    'history',
     'quicklinks'
 ];
 
