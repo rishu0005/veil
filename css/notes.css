@@ -387,3 +387,33 @@
 .note-save:hover {
     background: #3d78e6;
 }
+
+.notes-search {
+    margin-bottom: 12px;
+}
+
+.notes-search input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+
+    outline: none;
+
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+
+    font-family: inherit;
+    font-size: 0.8rem;
+}
+
+.notes-search input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.notes-search input:focus {
+    border-color: rgba(255, 255, 255, 0.3);
+}

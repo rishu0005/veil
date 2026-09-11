@@ -106,8 +106,8 @@ function executeQuickLink(keyword){
 
   const quickLinks = getQuickLinks();
   let result =  quickLinks[keyword.toLowerCase()];
-  console.log("quickLinks:", quickLinks);
-  console.log(result);
+  // console.log("quickLinks:", quickLinks);
+  // console.log(result);
   if (!result) {
     console.log('not found keyword ')
     return { status: false, message: "No quick link with that keyword." };

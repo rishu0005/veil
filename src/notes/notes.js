@@ -17,9 +17,7 @@ function closeNotes() {
 els.close.addEventListener("click", closeNotes);
 
 
-function renderNotes() {
-
-    const notes = getAllNotes();
+function renderNotes(notes = getAllNotes()) {
 
     els.list.innerHTML = "";
 
@@ -29,7 +27,7 @@ function renderNotes() {
     if (notes.length === 0) {
         els.list.innerHTML = `
             <div class="notes-empty">
-                No notes yet.
+                No notes found.
             </div>
         `;
         return;
@@ -57,6 +55,29 @@ function renderNotes() {
 
         els.list.appendChild(item);
     });
+}
+
+function searchNotes(query) {
+
+    const notes = getAllNotes();
+
+    query = query.trim().toLowerCase();
+
+    if (!query) {
+        renderNotes(notes);
+        return;
+    }
+
+    const filteredNotes = notes.filter(note => {
+
+        return (
+            note.title.toLowerCase().includes(query) ||
+            note.description.toLowerCase().includes(query)
+        );
+
+    });
+
+    renderNotes(filteredNotes);
 }
 
 function showListView() {
@@ -105,8 +126,12 @@ function showNote(id) {
 
 function openNotes() {
     els.overlay.classList.remove("hidden");
+
+    els.search.value = "";
+
     showListView();
     renderNotes();
+    els.search.focus();
 }
 
 function openNewNoteForm() {
@@ -164,6 +189,10 @@ els.form.addEventListener("submit", (event) => {
 
     renderNotes();
     showListView();
+});
+
+els.search.addEventListener("input", () => {
+    searchNotes(els.search.value);
 });
 
 function showFormMessage(message, success) {

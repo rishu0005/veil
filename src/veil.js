@@ -11,7 +11,6 @@ import { executeCommand } from "./search/command.js";
 import { executeQuickLink } from "./storage/quicklink.js"
 import { CONSTANTS } from "./constants/constants.js";
 import { els} from "./js/dom.js";
-// import { getAllNotes, getNote, createNote, updateNote, deleteNote } from "./storage/notes.js";
 import {openNotes, closeNotes} from './notes/notes.js';
 
 

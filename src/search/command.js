@@ -1,9 +1,24 @@
 import { openQuickLinks } from "../quicklinks/quicklinks.js";
+import {openNotes} from '../notes/notes.js';
 
-const commands = [
-    'notes',
-    'quicklinks'
-];
+const commands = {
+    notes: {
+        execute: openNotes
+    },
+
+    quicklinks: {
+        execute: openQuickLinks
+    },
+
+    // note: {
+    //     execute: executeNote
+    // },
+
+    // quicklink: {
+    //     execute: executeQuickLink
+    // }
+};
+
 
 function executeCommand(query){
     query = query.trim();
@@ -26,24 +41,14 @@ function executeCommand(query){
     }
     switch(query){
         case 'notes':
-         console.log('note command executed');
-         break;
+            openNotes();
+            console.log('note command executed');
+            break;
 
-        case 'console':
-         console.log('console command executed');
-         break;
-
-        case 'tab':
-         console.log('tab command executed');
-         break;
-
-        case 'history':
-         console.log('history command executed');
-         break;
         case 'quicklinks':
-         openQuickLinks();
-         console.log('quickLinks command executed');
-         break;
+            openQuickLinks();
+            console.log('quickLinks command executed');
+            break;
 
     }
 

@@ -37,7 +37,8 @@ const els = {
   description: document.getElementById("noteDescription"),
   message: document.getElementById("noteFormMessage"),
   cancel: document.getElementById("cancelNote"),
-  save: document.getElementById("saveNote")
+  save: document.getElementById("saveNote"),
+  search: document.getElementById("notesSearch"),
 };
 
 export {els }
